@@ -124,9 +124,15 @@ pre-release-replacements = [
 default = []
 
 [dependencies]
+anyhow = "1.0.96"
+clap = { version = "4.5.31", features = ["derive"] }
+clap-cargo = "0.15.2"
 
 [dev-dependencies]
 automod = "1.0.14"
+cargo-test-macro = "0.4.0"
+cargo-test-support = "0.7.0"
+snapbox = { version = "0.6.21", features = ["cmd", "path"] }
 
 [lints]
 workspace = true
