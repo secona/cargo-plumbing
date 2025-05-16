@@ -20,5 +20,5 @@ impl Command {
 #[test]
 fn verify_app() {
     use clap::CommandFactory;
-    Command::command().debug_assert()
+    Command::command().debug_assert();
 }
