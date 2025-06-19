@@ -20,6 +20,7 @@ include = [
 [workspace.dependencies]
 anyhow = "1.0.96"
 automod = "1.0.14"
+cargo = "0.88.0"
 cargo-test-macro = "0.4.0"
 cargo-test-support = "0.7.0"
 clap = "4.5.31"
@@ -140,6 +141,7 @@ unstable-schema = ["dep:schemars", "dep:serde_json"]
 
 [dependencies]
 anyhow.workspace = true
+cargo.workspace = true
 clap = { workspace = true, features = ["derive"] }
 clap-cargo.workspace = true
 schemars = { workspace = true, optional = true, features = ["preserve_order", "semver1"] }
