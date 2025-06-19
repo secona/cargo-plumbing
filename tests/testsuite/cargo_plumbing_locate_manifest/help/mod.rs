@@ -10,7 +10,7 @@ fn case() {
         .arg("locate-manifest")
         .arg("--help")
         .assert()
-        .code(2)
+        .success()
         .stdout_eq(file!["stdout.term.svg"])
         .stderr_eq(file!["stderr.term.svg"]);
 }

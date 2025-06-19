@@ -10,15 +10,11 @@ fn simple() {
 
     p.cargo_plumbing("plumbing locate-manifest")
         .with_stderr_data(str![[r#"
-[ERROR] unrecognized subcommand 'locate-manifest'
-
-Usage: cargo plumbing <COMMAND>
-
-For more information, try '--help'.
+[ERROR] not implemented
 
 "#]])
         .with_stdout_data("")
-        .with_status(2)
+        .with_status(101)
         .run();
 }
 
@@ -32,9 +28,9 @@ fn manifest_path_arg() {
     p.cargo_plumbing("plumbing locate-manifest")
         .args(&["--manifest-path", wd])
         .with_stderr_data(str![[r#"
-[ERROR] unrecognized subcommand 'locate-manifest'
+[ERROR] unexpected argument '--manifest-path' found
 
-Usage: cargo plumbing <COMMAND>
+Usage: cargo plumbing locate-manifest
 
 For more information, try '--help'.
 
@@ -79,15 +75,11 @@ fn found_virtual_manifest() {
 
     p.cargo_plumbing("plumbing locate-manifest")
         .with_stderr_data(str![[r#"
-[ERROR] unrecognized subcommand 'locate-manifest'
-
-Usage: cargo plumbing <COMMAND>
-
-For more information, try '--help'.
+[ERROR] not implemented
 
 "#]])
         .with_stdout_data("")
-        .with_status(2)
+        .with_status(101)
         .run();
 }
 
@@ -97,14 +89,10 @@ fn no_manifest_found() {
 
     p.cargo_plumbing("plumbing locate-manifest")
         .with_stderr_data(str![[r#"
-[ERROR] unrecognized subcommand 'locate-manifest'
-
-Usage: cargo plumbing <COMMAND>
-
-For more information, try '--help'.
+[ERROR] not implemented
 
 "#]])
         .with_stdout_data("")
-        .with_status(2)
+        .with_status(101)
         .run();
 }
