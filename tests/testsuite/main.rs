@@ -1,5 +1,3 @@
-automod::dir!("tests/testsuite");
-
 use cargo_test_support::{execs, process, ArgLineCommandExt, Execs, Project};
 
 pub fn cargo_plumbing_exe() -> std::path::PathBuf {
