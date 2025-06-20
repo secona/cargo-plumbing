@@ -20,3 +20,18 @@ impl ProjectExt for Project {
         execs().with_process_builder(p)
     }
 }
+
+pub trait CargoCommandExt {
+    fn cargo_ui() -> Self;
+}
+
+impl CargoCommandExt for snapbox::cmd::Command {
+    fn cargo_ui() -> Self {
+        use cargo_test_support::TestEnvCommandExt;
+        Self::new(cargo_plumbing_exe())
+            .with_assert(cargo_test_support::compare::assert_ui())
+            .env("CARGO_TERM_COLOR", "always")
+            .env("CARGO_TERM_HYPERLINKS", "true")
+            .test_env()
+    }
+}
