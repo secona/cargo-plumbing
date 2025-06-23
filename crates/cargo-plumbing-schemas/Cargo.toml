@@ -1,0 +1,17 @@
+[package]
+name = "cargo-plumbing-schemas"
+version = "0.0.1"
+description = "Schema definitions for cargo-plumbing"
+repository.workspace = true
+license.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+
+[features]
+unstable-schema = ["dep:schemars", "dep:serde_json"]
+
+[dependencies]
+schemars = { workspace = true, features = ["preserve_order", "semver1"], optional = true }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true, optional = true }
+serde-untagged.workspace = true

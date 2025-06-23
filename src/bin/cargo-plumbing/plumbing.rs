@@ -2,10 +2,15 @@ use cargo_plumbing::CargoResult;
 
 #[derive(Debug, clap::Subcommand)]
 #[command(styles = clap_cargo::style::CLAP_STYLING)]
-pub(crate) enum Plumbing {}
+pub(crate) enum Plumbing {
+    /// Temporary dummy command to make the enum inhabited
+    Dummy,
+}
 
 impl Plumbing {
     pub(crate) fn exec(self) -> CargoResult<()> {
-        anyhow::bail!("not implemented");
+        match self {
+            Self::Dummy => anyhow::bail!("not implemented"),
+        }
     }
 }
