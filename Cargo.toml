@@ -137,17 +137,14 @@ pre-release-replacements = [
 
 [features]
 default = []
-unstable-schema = ["dep:schemars", "dep:serde_json"]
 
 [dependencies]
 anyhow.workspace = true
 cargo.workspace = true
 clap = { workspace = true, features = ["derive"] }
 clap-cargo.workspace = true
-schemars = { workspace = true, optional = true, features = ["preserve_order", "semver1"] }
 serde = { workspace = true, features = ["derive"] }
 serde-untagged.workspace = true
-serde_json = { workspace = true, optional = true }
 
 [dev-dependencies]
 cargo-test-macro.workspace = true
