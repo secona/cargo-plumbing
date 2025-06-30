@@ -11,10 +11,15 @@ fn simple() {
     p.cargo_plumbing("plumbing locate-manifest")
         .with_stdout_data(
             str![[r#"
-{"manifest_path":"[ROOT]/foo/Cargo.toml","reason":"manifest-location"}
-
+[
+  {
+    "manifest_path": "[ROOT]/foo/Cargo.toml",
+    "reason": "manifest-location"
+  }
+]
 "#]]
-            .is_jsonlines(),
+            .is_json()
+            .against_jsonlines(),
         )
         .with_stderr_data("")
         .with_status(0)
@@ -32,10 +37,15 @@ fn manifest_path_arg() {
         .args(&["--manifest-path", wd])
         .with_stdout_data(
             str![[r#"
-{"manifest_path":"[ROOT]/foo/Cargo.toml","reason":"manifest-location"}
-
+[
+  {
+    "manifest_path": "[ROOT]/foo/Cargo.toml",
+    "reason": "manifest-location"
+  }
+]
 "#]]
-            .is_jsonlines(),
+            .is_json()
+            .against_jsonlines(),
         )
         .with_stderr_data("")
         .with_status(0)
@@ -78,10 +88,15 @@ fn found_virtual_manifest() {
     p.cargo_plumbing("plumbing locate-manifest")
         .with_stdout_data(
             str![[r#"
-{"manifest_path":"[ROOT]/foo/Cargo.toml","reason":"manifest-location"}
-
+[
+  {
+    "manifest_path": "[ROOT]/foo/Cargo.toml",
+    "reason": "manifest-location"
+  }
+]
 "#]]
-            .is_jsonlines(),
+            .is_json()
+            .against_jsonlines(),
         )
         .with_stderr_data("")
         .with_status(0)
