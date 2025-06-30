@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "LocateManifestMessage",
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "manifest_path": {
+          "type": "string"
+        },
+        "reason": {
+          "type": "string",
+          "const": "manifest-location"
+        }
+      },
+      "required": [
+        "reason",
+        "manifest_path"
+      ]
+    }
+  ]
+}
