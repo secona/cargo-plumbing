@@ -6,7 +6,7 @@ members = ["crates/*"]
 repository = "https://github.com/crate-ci/cargo-plumbing"
 license = "MIT OR Apache-2.0"
 edition = "2021"
-rust-version = "1.85.0"  # MSRV
+rust-version = "1.86.0"  # MSRV
 include = [
   "build.rs",
   "src/**/*",
@@ -20,9 +20,9 @@ include = [
 [workspace.dependencies]
 anyhow = "1.0.96"
 automod = "1.0.14"
-cargo = "0.88.0"
-cargo-test-macro = "0.4.0"
-cargo-test-support = "0.7.0"
+cargo = "0.89.0"
+cargo-test-macro = "0.4.3"
+cargo-test-support = "0.7.4"
 cargo-plumbing-schemas = { version = "0.0.1", path = "crates/cargo-plumbing-schemas" }
 clap = "4.5.31"
 clap-cargo = "0.15.2"
