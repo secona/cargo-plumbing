@@ -10,7 +10,7 @@ fn case() {
         .arg("read-manifest")
         .arg("--help")
         .assert()
-        .failure()
+        .success()
         .stdout_eq(file!["stdout.term.svg"])
         .stderr_eq(file!["stderr.term.svg"]);
 }
