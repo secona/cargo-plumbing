@@ -126,7 +126,9 @@ fn simple_with_deps() {
     p.cargo_plumbing("plumbing read-manifest")
         .arg("--manifest-path")
         .arg(p.root().join("Cargo.toml"))
-        .with_stdout_data(str![[r#"
+        .arg("--workspace")
+        .with_stdout_data(
+            str![[r#"
 [
   {
     "manifest": {
@@ -375,7 +377,9 @@ fn workspace_real_manifest_with_deps() {
     p.cargo_plumbing("plumbing read-manifest")
         .arg("--manifest-path")
         .arg(p.root().join("Cargo.toml"))
-        .with_stdout_data(str![[r#"
+        .arg("--workspace")
+        .with_stdout_data(
+            str![[r#"
 [
   {
     "manifest": {
@@ -647,7 +651,9 @@ fn workspace_real_manifest_with_multiple_members() {
     p.cargo_plumbing("plumbing read-manifest")
         .arg("--manifest-path")
         .arg(p.root().join("Cargo.toml"))
-        .with_stdout_data(str![[r#"
+        .arg("--workspace")
+        .with_stdout_data(
+            str![[r#"
 [
   {
     "manifest": {
@@ -738,6 +744,160 @@ fn workspace_real_manifest_with_multiple_members() {
     },
     "path": "[ROOT]/foo/Cargo.toml",
     "pkg_id": "path+[ROOTURL]/foo#read-manifest-test@0.1.0",
+    "reason": "manifest"
+  },
+  {
+    "manifest": {
+      "badges": null,
+      "bench": [],
+      "bin": [],
+      "build-dependencies": null,
+      "build_dependencies": null,
+      "cargo-features": null,
+      "dependencies": null,
+      "dev-dependencies": null,
+      "dev_dependencies": null,
+      "example": [],
+      "features": null,
+      "lib": {
+        "bench": null,
+        "crate-type": null,
+        "crate_type": null,
+        "doc": null,
+        "doc-scrape-examples": null,
+        "doctest": null,
+        "edition": null,
+        "filename": null,
+        "harness": null,
+        "name": "crate1",
+        "path": "src/lib.rs",
+        "proc-macro": null,
+        "proc_macro": null,
+        "required-features": null,
+        "test": null
+      },
+      "lints": null,
+      "package": {
+        "authors": [],
+        "autobenches": false,
+        "autobins": false,
+        "autoexamples": false,
+        "autolib": false,
+        "autotests": false,
+        "build": false,
+        "categories": null,
+        "default-run": null,
+        "default-target": null,
+        "description": null,
+        "documentation": null,
+        "edition": "2024",
+        "exclude": null,
+        "forced-target": null,
+        "homepage": null,
+        "im-a-teapot": null,
+        "include": null,
+        "keywords": null,
+        "license": null,
+        "license-file": null,
+        "links": null,
+        "metabuild": null,
+        "metadata": null,
+        "name": "crate1",
+        "publish": null,
+        "readme": false,
+        "repository": null,
+        "resolver": null,
+        "rust-version": null,
+        "version": "0.1.0",
+        "workspace": null
+      },
+      "patch": null,
+      "profile": null,
+      "project": null,
+      "replace": null,
+      "target": null,
+      "test": [],
+      "workspace": null
+    },
+    "path": "[ROOT]/foo/crate1/Cargo.toml",
+    "pkg_id": "path+[ROOTURL]/foo/crate1#0.1.0",
+    "reason": "manifest"
+  },
+  {
+    "manifest": {
+      "badges": null,
+      "bench": [],
+      "bin": [],
+      "build-dependencies": null,
+      "build_dependencies": null,
+      "cargo-features": null,
+      "dependencies": null,
+      "dev-dependencies": null,
+      "dev_dependencies": null,
+      "example": [],
+      "features": null,
+      "lib": {
+        "bench": null,
+        "crate-type": null,
+        "crate_type": null,
+        "doc": null,
+        "doc-scrape-examples": null,
+        "doctest": null,
+        "edition": null,
+        "filename": null,
+        "harness": null,
+        "name": "crate2",
+        "path": "src/lib.rs",
+        "proc-macro": null,
+        "proc_macro": null,
+        "required-features": null,
+        "test": null
+      },
+      "lints": null,
+      "package": {
+        "authors": [],
+        "autobenches": false,
+        "autobins": false,
+        "autoexamples": false,
+        "autolib": false,
+        "autotests": false,
+        "build": false,
+        "categories": null,
+        "default-run": null,
+        "default-target": null,
+        "description": null,
+        "documentation": null,
+        "edition": "2024",
+        "exclude": null,
+        "forced-target": null,
+        "homepage": null,
+        "im-a-teapot": null,
+        "include": null,
+        "keywords": null,
+        "license": null,
+        "license-file": null,
+        "links": null,
+        "metabuild": null,
+        "metadata": null,
+        "name": "crate2",
+        "publish": null,
+        "readme": false,
+        "repository": null,
+        "resolver": null,
+        "rust-version": null,
+        "version": "0.1.0",
+        "workspace": null
+      },
+      "patch": null,
+      "profile": null,
+      "project": null,
+      "replace": null,
+      "target": null,
+      "test": [],
+      "workspace": null
+    },
+    "path": "[ROOT]/foo/crate2/Cargo.toml",
+    "pkg_id": "path+[ROOTURL]/foo/crate2#0.1.0",
     "reason": "manifest"
   }
 ]
@@ -842,7 +1002,9 @@ fn workspace_virtual_manifest_with_multiple_members() {
     p.cargo_plumbing("plumbing read-manifest")
         .arg("--manifest-path")
         .arg(p.root().join("Cargo.toml"))
-        .with_stdout_data(str![[r#"
+        .arg("--workspace")
+        .with_stdout_data(
+            str![[r#"
 [
   {
     "manifest": {
@@ -882,6 +1044,160 @@ fn workspace_virtual_manifest_with_multiple_members() {
     },
     "path": "[ROOT]/foo/Cargo.toml",
     "pkg_id": null,
+    "reason": "manifest"
+  },
+  {
+    "manifest": {
+      "badges": null,
+      "bench": [],
+      "bin": [],
+      "build-dependencies": null,
+      "build_dependencies": null,
+      "cargo-features": null,
+      "dependencies": null,
+      "dev-dependencies": null,
+      "dev_dependencies": null,
+      "example": [],
+      "features": null,
+      "lib": {
+        "bench": null,
+        "crate-type": null,
+        "crate_type": null,
+        "doc": null,
+        "doc-scrape-examples": null,
+        "doctest": null,
+        "edition": null,
+        "filename": null,
+        "harness": null,
+        "name": "crate1",
+        "path": "src/lib.rs",
+        "proc-macro": null,
+        "proc_macro": null,
+        "required-features": null,
+        "test": null
+      },
+      "lints": null,
+      "package": {
+        "authors": [],
+        "autobenches": false,
+        "autobins": false,
+        "autoexamples": false,
+        "autolib": false,
+        "autotests": false,
+        "build": false,
+        "categories": null,
+        "default-run": null,
+        "default-target": null,
+        "description": null,
+        "documentation": null,
+        "edition": "2024",
+        "exclude": null,
+        "forced-target": null,
+        "homepage": null,
+        "im-a-teapot": null,
+        "include": null,
+        "keywords": null,
+        "license": null,
+        "license-file": null,
+        "links": null,
+        "metabuild": null,
+        "metadata": null,
+        "name": "crate1",
+        "publish": null,
+        "readme": false,
+        "repository": null,
+        "resolver": null,
+        "rust-version": null,
+        "version": "0.1.0",
+        "workspace": null
+      },
+      "patch": null,
+      "profile": null,
+      "project": null,
+      "replace": null,
+      "target": null,
+      "test": [],
+      "workspace": null
+    },
+    "path": "[ROOT]/foo/crate1/Cargo.toml",
+    "pkg_id": "path+[ROOTURL]/foo/crate1#0.1.0",
+    "reason": "manifest"
+  },
+  {
+    "manifest": {
+      "badges": null,
+      "bench": [],
+      "bin": [],
+      "build-dependencies": null,
+      "build_dependencies": null,
+      "cargo-features": null,
+      "dependencies": null,
+      "dev-dependencies": null,
+      "dev_dependencies": null,
+      "example": [],
+      "features": null,
+      "lib": {
+        "bench": null,
+        "crate-type": null,
+        "crate_type": null,
+        "doc": null,
+        "doc-scrape-examples": null,
+        "doctest": null,
+        "edition": null,
+        "filename": null,
+        "harness": null,
+        "name": "crate2",
+        "path": "src/lib.rs",
+        "proc-macro": null,
+        "proc_macro": null,
+        "required-features": null,
+        "test": null
+      },
+      "lints": null,
+      "package": {
+        "authors": [],
+        "autobenches": false,
+        "autobins": false,
+        "autoexamples": false,
+        "autolib": false,
+        "autotests": false,
+        "build": false,
+        "categories": null,
+        "default-run": null,
+        "default-target": null,
+        "description": null,
+        "documentation": null,
+        "edition": "2024",
+        "exclude": null,
+        "forced-target": null,
+        "homepage": null,
+        "im-a-teapot": null,
+        "include": null,
+        "keywords": null,
+        "license": null,
+        "license-file": null,
+        "links": null,
+        "metabuild": null,
+        "metadata": null,
+        "name": "crate2",
+        "publish": null,
+        "readme": false,
+        "repository": null,
+        "resolver": null,
+        "rust-version": null,
+        "version": "0.1.0",
+        "workspace": null
+      },
+      "patch": null,
+      "profile": null,
+      "project": null,
+      "replace": null,
+      "target": null,
+      "test": [],
+      "workspace": null
+    },
+    "path": "[ROOT]/foo/crate2/Cargo.toml",
+    "pkg_id": "path+[ROOTURL]/foo/crate2#0.1.0",
     "reason": "manifest"
   }
 ]
@@ -1158,8 +1474,103 @@ fn workspace_member_with_inherited_deps() {
     p.cargo_plumbing("plumbing read-manifest")
         .arg("--manifest-path")
         .arg(p.root().join("crate1/Cargo.toml"))
-        .with_stdout_data(str![[r#"
+        .arg("--workspace")
+        .with_stdout_data(
+            str![[r#"
 [
+  {
+    "manifest": {
+      "badges": null,
+      "bench": [],
+      "bin": [
+        {
+          "bench": null,
+          "crate-type": null,
+          "crate_type": null,
+          "doc": null,
+          "doc-scrape-examples": null,
+          "doctest": null,
+          "edition": null,
+          "filename": null,
+          "harness": null,
+          "name": "read-manifest-test",
+          "path": "src/main.rs",
+          "proc-macro": null,
+          "proc_macro": null,
+          "required-features": null,
+          "test": null
+        }
+      ],
+      "build-dependencies": null,
+      "build_dependencies": null,
+      "cargo-features": null,
+      "dependencies": null,
+      "dev-dependencies": null,
+      "dev_dependencies": null,
+      "example": [],
+      "features": null,
+      "lib": null,
+      "lints": null,
+      "package": {
+        "authors": [],
+        "autobenches": false,
+        "autobins": false,
+        "autoexamples": false,
+        "autolib": false,
+        "autotests": false,
+        "build": false,
+        "categories": null,
+        "default-run": null,
+        "default-target": null,
+        "description": null,
+        "documentation": null,
+        "edition": "2024",
+        "exclude": null,
+        "forced-target": null,
+        "homepage": null,
+        "im-a-teapot": null,
+        "include": null,
+        "keywords": null,
+        "license": null,
+        "license-file": null,
+        "links": null,
+        "metabuild": null,
+        "metadata": null,
+        "name": "read-manifest-test",
+        "publish": null,
+        "readme": false,
+        "repository": null,
+        "resolver": null,
+        "rust-version": null,
+        "version": "0.1.0",
+        "workspace": null
+      },
+      "patch": null,
+      "profile": null,
+      "project": null,
+      "replace": null,
+      "target": null,
+      "test": [],
+      "workspace": {
+        "default-members": null,
+        "dependencies": {
+          "a": "1.0.0"
+        },
+        "exclude": null,
+        "lints": null,
+        "members": [
+          "crate1",
+          "crate2"
+        ],
+        "metadata": null,
+        "package": null,
+        "resolver": "3"
+      }
+    },
+    "path": "[ROOT]/foo/Cargo.toml",
+    "pkg_id": "path+[ROOTURL]/foo#read-manifest-test@0.1.0",
+    "reason": "manifest"
+  },
   {
     "manifest": {
       "badges": null,
@@ -1266,28 +1677,7 @@ fn workspace_member_with_inherited_deps() {
       "build-dependencies": null,
       "build_dependencies": null,
       "cargo-features": null,
-      "dependencies": {
-        "a": {
-          "artifact": null,
-          "base": null,
-          "branch": null,
-          "default-features": null,
-          "default_features": null,
-          "features": null,
-          "git": null,
-          "lib": null,
-          "optional": null,
-          "package": null,
-          "path": null,
-          "public": null,
-          "registry": null,
-          "registry-index": null,
-          "rev": null,
-          "tag": null,
-          "target": null,
-          "version": "1.0.0"
-        }
-      },
+      "dependencies": null,
       "dev-dependencies": null,
       "dev_dependencies": null,
       "example": [],
@@ -1302,7 +1692,7 @@ fn workspace_member_with_inherited_deps() {
         "edition": null,
         "filename": null,
         "harness": null,
-        "name": "crate1",
+        "name": "crate2",
         "path": "src/lib.rs",
         "proc-macro": null,
         "proc_macro": null,
@@ -1335,7 +1725,7 @@ fn workspace_member_with_inherited_deps() {
         "links": null,
         "metabuild": null,
         "metadata": null,
-        "name": "crate1",
+        "name": "crate2",
         "publish": null,
         "readme": false,
         "repository": null,
@@ -1352,8 +1742,8 @@ fn workspace_member_with_inherited_deps() {
       "test": [],
       "workspace": null
     },
-    "path": "[ROOT]/foo/crate1/Cargo.toml",
-    "pkg_id": "path+[ROOTURL]/foo#crate1@0.1.0",
+    "path": "[ROOT]/foo/crate2/Cargo.toml",
+    "pkg_id": "path+[ROOTURL]/foo/crate2#0.1.0",
     "reason": "manifest"
   }
 ]
@@ -1628,8 +2018,52 @@ fn workspace_member_via_workspace_field() {
     p.cargo_plumbing("plumbing read-manifest")
         .arg("--manifest-path")
         .arg(p.root().join("crate1/Cargo.toml"))
-        .with_stdout_data(str![[r#"
+        .arg("--workspace")
+        .with_stdout_data(
+            str![[r#"
 [
+  {
+    "manifest": {
+      "badges": null,
+      "bench": null,
+      "bin": null,
+      "build-dependencies": null,
+      "build_dependencies": null,
+      "cargo-features": null,
+      "dependencies": null,
+      "dev-dependencies": null,
+      "dev_dependencies": null,
+      "example": null,
+      "features": null,
+      "lib": null,
+      "lints": null,
+      "package": null,
+      "patch": null,
+      "profile": null,
+      "project": null,
+      "replace": null,
+      "target": null,
+      "test": null,
+      "workspace": {
+        "default-members": null,
+        "dependencies": {
+          "a": "1.0.0"
+        },
+        "exclude": null,
+        "lints": null,
+        "members": [
+          "../crate1",
+          "../crate2"
+        ],
+        "metadata": null,
+        "package": null,
+        "resolver": "3"
+      }
+    },
+    "path": "[ROOT]/foo/workspace-root/Cargo.toml",
+    "pkg_id": null,
+    "reason": "manifest"
+  },
   {
     "manifest": {
       "badges": null,
@@ -1772,7 +2206,7 @@ fn workspace_member_via_workspace_field() {
         "edition": null,
         "filename": null,
         "harness": null,
-        "name": "crate1",
+        "name": "crate2",
         "path": "src/lib.rs",
         "proc-macro": null,
         "proc_macro": null,
@@ -1805,7 +2239,7 @@ fn workspace_member_via_workspace_field() {
         "links": null,
         "metabuild": null,
         "metadata": null,
-        "name": "crate1",
+        "name": "crate2",
         "publish": null,
         "readme": false,
         "repository": null,
@@ -1822,8 +2256,8 @@ fn workspace_member_via_workspace_field() {
       "test": [],
       "workspace": null
     },
-    "path": "[ROOT]/foo/crate1/Cargo.toml",
-    "pkg_id": "path+[ROOTURL]#crate1@0.1.0",
+    "path": "[ROOT]/foo/crate2/Cargo.toml",
+    "pkg_id": "path+[ROOTURL]/foo/crate2#0.1.0",
     "reason": "manifest"
   }
 ]

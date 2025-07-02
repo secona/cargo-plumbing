@@ -11,6 +11,8 @@ use clap::Parser;
 struct Args {
     #[arg(long)]
     manifest_path: Option<PathBuf>,
+    #[arg(long, default_value_t = false)]
+    workspace: bool,
 }
 
 fn run(args: &Args) -> CargoResult<()> {
@@ -44,30 +46,26 @@ fn run(args: &Args) -> CargoResult<()> {
         manifest_path.expect("failed to get manifest_path")
     };
 
-    let _manifest = {
+    let _manifests: Vec<TomlManifest> = {
         let mut cmd = Command::new("cargo");
         cmd.args(["run", "plumbing", "read-manifest"])
             .args(["--manifest-path", &manifest_path])
             .stdout(Stdio::piped());
 
+        if args.workspace {
+            cmd.arg("--workspace");
+        }
+
         let mut child = cmd.spawn().expect("failed to run read-manifest");
         let stdout = child.stdout.take().expect("failed to get stdout");
         let messages = ReadManifestMessage::parse_stream(BufReader::new(stdout));
 
-        let mut manifest: Option<TomlManifest> = None;
-
-        #[allow(clippy::never_loop)]
-        for message in messages {
-            match message.expect("failed to parse message") {
-                ReadManifestMessage::Manifest { manifest: m, .. } => {
-                    manifest = Some(m);
-                    break;
-                }
-            }
-        }
+        let manifests = messages.map(|message| match message.expect("failed to parse message") {
+            ReadManifestMessage::Manifest { manifest, .. } => manifest,
+        });
 
         child.wait().expect("failed to wait for read-manifest");
-        manifest.expect("failed to get manifest")
+        manifests.collect()
     };
 
     anyhow::bail!("check for {manifest_path} is not implemented!");
