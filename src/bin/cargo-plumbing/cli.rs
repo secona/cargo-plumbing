@@ -1,5 +1,4 @@
-use cargo::GlobalContext;
-use cargo_plumbing::CargoResult;
+use cargo::{CargoResult, GlobalContext};
 use clap::Parser;
 
 #[derive(Debug, Parser)]
