@@ -2,7 +2,7 @@ use std::io::BufReader;
 use std::path::PathBuf;
 use std::process::{Command, Stdio};
 
-use cargo_plumbing::CargoResult;
+use cargo::CargoResult;
 use cargo_plumbing_schemas::locate_manifest::LocateManifestMessage;
 use clap::Parser;
 

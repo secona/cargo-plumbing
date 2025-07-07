@@ -3,8 +3,7 @@ use std::fmt::Debug;
 use std::path::PathBuf;
 
 use cargo::util::important_paths::find_root_manifest_for_wd;
-use cargo::GlobalContext;
-use cargo_plumbing::CargoResult;
+use cargo::{CargoResult, GlobalContext};
 use cargo_plumbing_schemas::locate_manifest::LocateManifestMessage;
 
 #[derive(Debug, clap::Args)]
