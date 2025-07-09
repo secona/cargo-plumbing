@@ -24,6 +24,7 @@ pub(crate) fn exec(gctx: &GlobalContext, args: Args) -> CargoResult<()> {
     if args.workspace {
         let workspace = Workspace::new(&manifest_path, gctx)?;
 
+        // Here, we print the root Package or the Virtual Manifest of the workspace.
         let msg = match workspace.root_maybe() {
             MaybePackage::Package(pkg) => ReadManifestMessage::Manifest {
                 path: gctx.cwd().join(pkg.manifest_path()),
@@ -38,6 +39,9 @@ pub(crate) fn exec(gctx: &GlobalContext, args: Args) -> CargoResult<()> {
         };
         gctx.shell().print_json(&msg)?;
 
+        // We don't want to print the same manifest twice. This is why we're filtering the
+        // workspace members to make sure only those that are not root manifest are printed in this
+        // stage.
         for member in workspace
             .members()
             .filter(|p| p.manifest_path() != workspace.root_manifest())
@@ -50,6 +54,7 @@ pub(crate) fn exec(gctx: &GlobalContext, args: Args) -> CargoResult<()> {
             gctx.shell().print_json(&msg)?;
         }
     } else {
+        // As this is the branch without `--workspace`, we want to only read one manifest.
         let source_id = SourceId::for_manifest_path(&manifest_path)?;
         let (pkg_id, ws_config, manifest) = match read_manifest(&manifest_path, source_id, gctx)? {
             EitherManifest::Real(r) => (
@@ -71,17 +76,22 @@ pub(crate) fn exec(gctx: &GlobalContext, args: Args) -> CargoResult<()> {
         };
         gctx.shell().print_json(&msg)?;
 
+        // We also want to print the root workspace even if no `--workspace` flag is provided.
         match ws_config {
             WorkspaceConfig::Root(..) => {
-                // skip if the current manifest *is* the workspace manifest
+                // Skip if the current manifest *is* the workspace manifest.
             }
             WorkspaceConfig::Member {
                 root: Some(path_to_root),
             } => {
+                // This case is when the workspace members is defined through the package workspace
+                // key. Hence, we make it into a `PathBuf` first.
                 let path_to_root = PathBuf::from(path_to_root);
                 print_workspace_root(gctx, manifest_path, path_to_root)?;
             }
             WorkspaceConfig::Member { root: None } => {
+                // This case is the common case for workspace members where the members are defined
+                // from the workspace manifest
                 if let Some(path_to_root) = find_workspace_root(&manifest_path, gctx)? {
                     print_workspace_root(gctx, manifest_path, path_to_root)?;
                 }
@@ -92,6 +102,7 @@ pub(crate) fn exec(gctx: &GlobalContext, args: Args) -> CargoResult<()> {
     Ok(())
 }
 
+/// Given a manifest path the the path to workspace root, we print the manifest there.
 fn print_workspace_root(
     gctx: &GlobalContext,
     manifest_path: PathBuf,
