@@ -1,3 +1,13 @@
+//! # `cargo-plumbing-schemas`
+//!
+//! This library provides message and schema definitions for the inputs and outputs of
+//! `cargo-plumbing` commands. We provide JSON schemas for each message type. Each message
+//! is separated into a module corresponding to its plumbing subcommand.
+//!
+//! This library is intended to be used by tools that invoke `cargo-plumbing` commands and need
+//! to parse the jsonlines output. The [`MessageIter`] provides a convenient way to handle the
+//! jsonlines stream.
+
 use std::io::{self, BufRead};
 use std::marker::PhantomData;
 
@@ -6,9 +16,21 @@ use serde::de::DeserializeOwned;
 pub mod locate_manifest;
 pub mod read_manifest;
 
+/// Iterator over deserialized jsonline messages
+///
+/// It is not intended to be constructed directly by users. Instead, users should use solutions
+/// provided by the messages enums, such as [`LocateManifestMessage::parse_stream`] and other
+/// messages.
+///
+/// # Type Parameters
+///
+/// - `R`: The buffered reader it reads from.
+/// - `M`: The message type it deserializes each jsonline into.
+///
+/// [`LocateManifestMessage::parse_stream`]: [`locate_manifest::LocateManifestMessage::parse_stream`]
 pub struct MessageIter<R, M> {
-    _m: PhantomData<M>,
     input: R,
+    _m: PhantomData<M>,
 }
 
 impl<R: BufRead, M: DeserializeOwned> Iterator for MessageIter<R, M> {

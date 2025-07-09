@@ -1,20 +1,25 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "ReadManifestMessage",
+  "description": "Represents the messages outputted by the `cargo-plumbing read-manifest` command.\n\n This enum captures all possible JSON objects that the command can emit. The `reason`\n field acts as a discriminant to distinguish between different message types.",
   "oneOf": [
     {
+      "description": "A message containing the contents of a parsed `Cargo.toml` manifest.",
       "type": "object",
       "properties": {
         "path": {
+          "description": "The path to the manifest file that was read.",
           "type": "string"
         },
         "pkg_id": {
+          "description": "The package ID specification",
           "type": [
             "string",
             "null"
           ]
         },
         "manifest": {
+          "description": "The fully parsed and deserialized manifest content.",
           "$ref": "#/$defs/TomlManifest"
         },
         "reason": {
