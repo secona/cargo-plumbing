@@ -6,7 +6,7 @@ use snapbox::IntoData;
 use crate::ProjectExt;
 
 #[cargo_test]
-fn simple_with_deps() {
+fn package_with_deps() {
     Package::new("a", "1.0.0")
         .file("src/lib.rs", r#"pub fn f() -> i32 { 12 }"#)
         .publish();
@@ -221,7 +221,7 @@ fn simple_with_deps() {
 }
 
 #[cargo_test]
-fn workspace_real_manifest_with_deps() {
+fn workspace_package_with_inherited_deps() {
     Package::new("a", "1.0.0")
         .file("src/lib.rs", r#"pub fn f() -> i32 { 12 }"#)
         .publish();
@@ -502,7 +502,7 @@ fn workspace_real_manifest_with_deps() {
 }
 
 #[cargo_test]
-fn workspace_real_manifest_with_multiple_members() {
+fn workspace_package_with_members() {
     let p = project()
         .file("crate2/src/lib.rs", "")
         .file(
@@ -910,7 +910,7 @@ fn workspace_real_manifest_with_multiple_members() {
 }
 
 #[cargo_test]
-fn workspace_virtual_manifest_with_multiple_members() {
+fn virtual_workspace_with_members() {
     let p = project()
         .file("crate2/src/lib.rs", "")
         .file(
@@ -1756,7 +1756,7 @@ fn workspace_member_with_inherited_deps() {
 }
 
 #[cargo_test]
-fn workspace_member_via_workspace_field() {
+fn workspace_member_via_package_workspace_key() {
     Package::new("a", "1.0.0")
         .file("src/lib.rs", r#"pub fn f() -> i32 { 12 }"#)
         .publish();

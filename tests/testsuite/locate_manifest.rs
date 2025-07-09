@@ -5,7 +5,7 @@ use cargo_test_support::str;
 use crate::ProjectExt;
 
 #[cargo_test]
-fn simple() {
+fn finds_package_manifest() {
     let p = project().build();
 
     p.cargo_plumbing("plumbing locate-manifest")
@@ -27,7 +27,7 @@ fn simple() {
 }
 
 #[cargo_test]
-fn manifest_path_arg() {
+fn finds_package_manifest_via_manifest_path_flag() {
     let p = project().file("src/lib.rs", "").build();
 
     let wd = p.root().join("src");
@@ -53,7 +53,7 @@ fn manifest_path_arg() {
 }
 
 #[cargo_test]
-fn found_virtual_manifest() {
+fn finds_virtual_manifest() {
     let p = project()
         .file(
             "Cargo.toml",
@@ -104,7 +104,7 @@ fn found_virtual_manifest() {
 }
 
 #[cargo_test]
-fn no_manifest_found() {
+fn errors_when_no_manifest() {
     let p = project().no_manifest().build();
 
     p.cargo_plumbing("plumbing locate-manifest")
