@@ -30,7 +30,7 @@ fn run(args: &Args) -> CargoResult<()> {
         let stdout = child.stdout.take().expect("failed to get stdout");
         let messages = LocateManifestMessage::parse_stream(BufReader::new(stdout));
 
-        let mut manifest_path: Option<String> = None;
+        let mut manifest_path: Option<camino::Utf8PathBuf> = None;
 
         #[allow(clippy::never_loop)]
         for message in messages {
@@ -49,7 +49,7 @@ fn run(args: &Args) -> CargoResult<()> {
     let _manifests: Vec<TomlManifest> = {
         let mut cmd = Command::new("cargo");
         cmd.args(["run", "plumbing", "read-manifest"])
-            .args(["--manifest-path", &manifest_path])
+            .args(["--manifest-path", manifest_path.as_str()])
             .stdout(Stdio::piped());
 
         if args.workspace {

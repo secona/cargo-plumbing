@@ -11,6 +11,7 @@ rust-version.workspace = true
 unstable-schema = ["dep:schemars", "cargo-util-schemas/unstable-schema"]
 
 [dependencies]
+camino = { workspace = true, features = ["serde1"] }
 cargo-util-schemas.workspace = true
 schemars = { workspace = true, features = ["preserve_order", "semver1"], optional = true }
 serde = { workspace = true, features = ["derive"] }

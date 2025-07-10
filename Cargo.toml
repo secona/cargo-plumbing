@@ -20,6 +20,7 @@ include = [
 [workspace.dependencies]
 anyhow = "1.0.96"
 automod = "1.0.14"
+camino = "1.1.10"
 cargo = "0.89.0"
 cargo-test-macro = "0.4.3"
 cargo-test-support = "0.7.4"
@@ -143,6 +144,7 @@ default = []
 
 [dependencies]
 anyhow.workspace = true
+camino.workspace = true
 cargo.workspace = true
 cargo-plumbing-schemas.workspace = true
 cargo-util.workspace = true
