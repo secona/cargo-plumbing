@@ -2,6 +2,7 @@
 
 use std::{io::Read, marker::PhantomData};
 
+use camino::Utf8PathBuf;
 use serde::{Deserialize, Serialize};
 
 use crate::MessageIter;
@@ -17,7 +18,8 @@ pub enum LocateManifestMessage {
     /// A message containing the location of a found `Cargo.toml` manifest.
     ManifestLocation {
         /// The absolute path to the manifest file.
-        manifest_path: String,
+        #[cfg_attr(feature = "unstable-schema", schemars(with = "String"))]
+        manifest_path: Utf8PathBuf,
     },
 }
 
