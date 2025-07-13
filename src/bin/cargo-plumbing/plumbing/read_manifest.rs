@@ -18,7 +18,7 @@ pub(crate) struct Args {
     workspace: bool,
 }
 
-pub(crate) fn exec(gctx: &GlobalContext, args: Args) -> CargoResult<()> {
+pub(crate) fn exec(gctx: &mut GlobalContext, args: Args) -> CargoResult<()> {
     let manifest_path = gctx.cwd().join(args.manifest_path);
 
     if args.workspace {

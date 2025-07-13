@@ -15,7 +15,7 @@ pub(crate) enum Plumbing {
 }
 
 impl Plumbing {
-    pub(crate) fn exec(self, gctx: &GlobalContext) -> CargoResult<()> {
+    pub(crate) fn exec(self, gctx: &mut GlobalContext) -> CargoResult<()> {
         match self {
             Self::LocateManifest(args) => locate_manifest::exec(gctx, args),
             Self::ReadManifest(args) => read_manifest::exec(gctx, args),
