@@ -407,6 +407,8 @@ dependencies = [
  "serde-untagged",
  "serde_json",
  "snapbox",
+ "thiserror 2.0.12",
+ "url",
 ]
 
 [[package]]
@@ -3788,6 +3790,7 @@ dependencies = [
  "form_urlencoded",
  "idna",
  "percent-encoding",
+ "serde",
 ]
 
 [[package]]

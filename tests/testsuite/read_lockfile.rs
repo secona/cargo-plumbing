@@ -316,7 +316,7 @@ fn package_with_varying_deps_sources() {
       {
         "name": "a",
         "version": "1.0.0",
-        "source": "git+[ROOTURL]/my-git-repo?rev=v1.0.0#[..]",
+        "source": "git+[ROOTURL]/my-git-repo?rev=v1.0.0",
         "checksum": null,
         "dependencies": null,
         "replace": null
@@ -332,7 +332,7 @@ fn package_with_varying_deps_sources() {
       {
         "name": "a",
         "version": "2.0.0",
-        "source": "git+[ROOTURL]/my-git-repo?rev=v2.0.0#[..]",
+        "source": "git+[ROOTURL]/my-git-repo?rev=v2.0.0",
         "checksum": null,
         "dependencies": null,
         "replace": null
@@ -340,7 +340,7 @@ fn package_with_varying_deps_sources() {
       {
         "name": "a",
         "version": "2.0.0",
-        "source": "git+[ROOTURL]/my-git-repo#[..]",
+        "source": "git+[ROOTURL]/my-git-repo",
         "checksum": null,
         "dependencies": null,
         "replace": null
