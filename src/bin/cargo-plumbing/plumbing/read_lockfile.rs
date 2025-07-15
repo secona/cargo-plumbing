@@ -3,9 +3,9 @@ use std::io::Read;
 use std::path::PathBuf;
 
 use anyhow::Context as _;
-use cargo::core::resolver::EncodableResolve;
 use cargo::util::Filesystem;
 use cargo::{CargoResult, GlobalContext};
+use cargo_plumbing::cargo::core::resolver::encode::EncodableResolve;
 
 #[derive(Debug, clap::Args)]
 pub(crate) struct Args {
