@@ -7,7 +7,7 @@ mod plumbing;
 fn main() {
     let args = cli::Command::parse();
 
-    let gctx = match GlobalContext::default() {
+    let mut gctx = match GlobalContext::default() {
         Ok(gctx) => gctx,
         Err(e) => {
             let mut shell = Shell::new();
@@ -15,7 +15,7 @@ fn main() {
         }
     };
 
-    if let Err(e) = args.exec(&gctx) {
+    if let Err(e) = args.exec(&mut gctx) {
         cargo::exit_with_error(e.into(), &mut gctx.shell());
     }
 }

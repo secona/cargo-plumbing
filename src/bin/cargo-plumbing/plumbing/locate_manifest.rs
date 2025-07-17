@@ -14,7 +14,7 @@ pub(crate) struct Args {
     manifest_path: Option<PathBuf>,
 }
 
-pub(crate) fn exec(gctx: &GlobalContext, args: Args) -> CargoResult<()> {
+pub(crate) fn exec(gctx: &mut GlobalContext, args: Args) -> CargoResult<()> {
     let path = args.manifest_path.unwrap_or(env::current_dir()?);
     let manifest_path = find_root_manifest_for_wd(&path)?;
 
