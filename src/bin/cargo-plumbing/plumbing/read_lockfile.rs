@@ -27,8 +27,9 @@ pub(crate) fn exec(gctx: &GlobalContext, args: Args) -> CargoResult<()> {
         .with_context(|| format!("failed to read file: {}", lock_f.path().display()))?;
 
     let v: EncodableResolve = toml::from_str(&lock_s)?;
+    let lockfile = v.normalize();
 
-    let msg = ReadLockfileMessage::Lockfile { lockfile: v };
+    let msg = ReadLockfileMessage::Lockfile { lockfile };
     gctx.shell().print_json(&msg)?;
 
     Ok(())

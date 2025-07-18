@@ -7,7 +7,7 @@
       "type": "object",
       "properties": {
         "lockfile": {
-          "$ref": "#/$defs/EncodableResolve"
+          "$ref": "#/$defs/NormalizedResolve"
         },
         "reason": {
           "type": "string",
@@ -21,35 +21,14 @@
     }
   ],
   "$defs": {
-    "EncodableResolve": {
+    "NormalizedResolve": {
       "type": "object",
       "properties": {
-        "version": {
-          "type": [
-            "integer",
-            "null"
-          ],
-          "format": "uint32",
-          "minimum": 0
-        },
         "package": {
-          "type": [
-            "array",
-            "null"
-          ],
+          "type": "array",
           "items": {
-            "$ref": "#/$defs/EncodableDependency"
+            "$ref": "#/$defs/NormalizedDependency"
           }
-        },
-        "root": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/EncodableDependency"
-            },
-            {
-              "type": "null"
-            }
-          ]
         },
         "metadata": {
           "type": [
@@ -61,28 +40,18 @@
           }
         },
         "patch": {
-          "$ref": "#/$defs/EncodablePatch"
+          "$ref": "#/$defs/NormalizedPatch"
         }
-      }
+      },
+      "required": [
+        "package"
+      ]
     },
-    "EncodableDependency": {
+    "NormalizedDependency": {
       "type": "object",
       "properties": {
-        "name": {
+        "id": {
           "type": "string"
-        },
-        "version": {
-          "type": "string"
-        },
-        "source": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/EncodableSourceId"
-            },
-            {
-              "type": "null"
-            }
-          ]
         },
         "checksum": {
           "type": [
@@ -92,82 +61,28 @@
         },
         "dependencies": {
           "type": [
-            "array",
-            "null"
-          ],
-          "items": {
-            "$ref": "#/$defs/EncodablePackageId"
-          }
-        },
-        "replace": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/EncodablePackageId"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        }
-      },
-      "required": [
-        "name",
-        "version"
-      ]
-    },
-    "EncodableSourceId": {
-      "type": "object",
-      "properties": {
-        "url": {
-          "type": "string"
-        },
-        "kind": {
-          "type": "string"
-        },
-        "encoded": {
-          "type": "boolean"
-        }
-      },
-      "required": [
-        "url",
-        "kind",
-        "encoded"
-      ]
-    },
-    "EncodablePackageId": {
-      "type": "object",
-      "properties": {
-        "name": {
-          "type": "string"
-        },
-        "version": {
-          "type": [
             "string",
             "null"
           ]
         },
-        "source": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/EncodableSourceId"
-            },
-            {
-              "type": "null"
-            }
+        "replace": {
+          "type": [
+            "string",
+            "null"
           ]
         }
       },
       "required": [
-        "name"
+        "id"
       ]
     },
-    "EncodablePatch": {
+    "NormalizedPatch": {
       "type": "object",
       "properties": {
         "unused": {
           "type": "array",
           "items": {
-            "$ref": "#/$defs/EncodableDependency"
+            "$ref": "#/$defs/NormalizedDependency"
           }
         }
       },

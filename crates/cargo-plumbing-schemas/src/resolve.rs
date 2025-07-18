@@ -2,9 +2,13 @@
 
 use std::{collections::BTreeMap, fmt, str::FromStr};
 
-use cargo_util_schemas::core::{GitReference, SourceKind};
+use cargo_util_schemas::core::{GitReference, PackageIdSpec, SourceKind};
 use serde::{de, ser, Deserialize, Serialize};
 use url::Url;
+
+use crate::read_lockfile::{
+    NormalizedDependency, NormalizedPatch, NormalizedResolve, NormalizedSourceId,
+};
 
 #[derive(Debug, thiserror::Error)]
 #[error(transparent)]
@@ -50,6 +54,26 @@ pub struct EncodableResolve {
     pub patch: EncodablePatch,
 }
 
+impl EncodableResolve {
+    pub fn normalize(self) -> NormalizedResolve {
+        let mut package = if let Some(package) = self.package {
+            package.into_iter().map(|p| p.normalize()).collect()
+        } else {
+            Vec::new()
+        };
+
+        if let Some(root) = self.root {
+            package.push(root.normalize());
+        }
+
+        NormalizedResolve {
+            package,
+            metadata: self.metadata,
+            patch: self.patch.normalize(),
+        }
+    }
+}
+
 pub type Metadata = BTreeMap<String, String>;
 
 #[derive(Serialize, Deserialize, Debug, Default)]
@@ -60,6 +84,11 @@ pub struct EncodablePatch {
 }
 
 impl EncodablePatch {
+    pub fn normalize(self) -> NormalizedPatch {
+        let unused = self.unused.into_iter().map(|u| u.normalize()).collect();
+        NormalizedPatch { unused }
+    }
+
     fn is_empty(&self) -> bool {
         self.unused.is_empty()
     }
@@ -77,12 +106,51 @@ pub struct EncodableDependency {
     pub replace: Option<EncodablePackageId>,
 }
 
+impl EncodableDependency {
+    pub fn normalize(self) -> NormalizedDependency {
+        let mut id = PackageIdSpec::new(self.name).with_version(self.version.parse().unwrap());
+
+        if let Some(source) = self.source {
+            id = id.with_kind(source.kind).with_url(source.url);
+        }
+
+        let dependencies = self
+            .dependencies
+            .map(|dependencies| dependencies.into_iter().map(|d| d.normalize()).collect());
+
+        let replace = self.replace.map(|r| r.normalize());
+
+        NormalizedDependency {
+            id,
+            checksum: self.checksum,
+            dependencies,
+            replace,
+        }
+    }
+}
+
 #[derive(Debug)]
 #[cfg_attr(feature = "unstable-schema", derive(schemars::JsonSchema))]
 pub struct EncodablePackageId {
     pub name: String,
     pub version: Option<String>,
     pub source: Option<EncodableSourceId>,
+}
+
+impl EncodablePackageId {
+    pub fn normalize(self) -> PackageIdSpec {
+        let mut id = PackageIdSpec::new(self.name);
+
+        if let Some(version) = self.version {
+            id = id.with_version(version.parse().unwrap());
+        }
+
+        if let Some(source) = self.source {
+            id = id.with_url(source.url).with_kind(source.kind);
+        }
+
+        id
+    }
 }
 
 impl fmt::Display for EncodablePackageId {
@@ -213,6 +281,13 @@ impl EncodableSourceId {
 
     fn is_path(&self) -> bool {
         self.kind == SourceKind::Path
+    }
+
+    pub fn normalize(self) -> NormalizedSourceId {
+        NormalizedSourceId {
+            url: self.url,
+            kind: self.kind,
+        }
     }
 }
 
