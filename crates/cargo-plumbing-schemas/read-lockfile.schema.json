@@ -1,0 +1,179 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ReadLockfileMessage",
+  "description": "Represents the messages outputted by the `cargo-plumbing read-lockfile` command.\n\n This enum captures all possible JSON objects that the command can emit. The `reason`\n field acts as a discriminant to distinguish between different message types.",
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "lockfile": {
+          "$ref": "#/$defs/EncodableResolve"
+        },
+        "reason": {
+          "type": "string",
+          "const": "lockfile"
+        }
+      },
+      "required": [
+        "reason",
+        "lockfile"
+      ]
+    }
+  ],
+  "$defs": {
+    "EncodableResolve": {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint32",
+          "minimum": 0
+        },
+        "package": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/$defs/EncodableDependency"
+          }
+        },
+        "root": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EncodableDependency"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "metadata": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "patch": {
+          "$ref": "#/$defs/EncodablePatch"
+        }
+      }
+    },
+    "EncodableDependency": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        },
+        "source": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EncodableSourceId"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "checksum": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "dependencies": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/$defs/EncodablePackageId"
+          }
+        },
+        "replace": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EncodablePackageId"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "name",
+        "version"
+      ]
+    },
+    "EncodableSourceId": {
+      "type": "object",
+      "properties": {
+        "url": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string"
+        },
+        "encoded": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "url",
+        "kind",
+        "encoded"
+      ]
+    },
+    "EncodablePackageId": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "version": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "source": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EncodableSourceId"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "name"
+      ]
+    },
+    "EncodablePatch": {
+      "type": "object",
+      "properties": {
+        "unused": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/EncodableDependency"
+          }
+        }
+      },
+      "required": [
+        "unused"
+      ]
+    }
+  }
+}

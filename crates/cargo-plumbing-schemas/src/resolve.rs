@@ -40,6 +40,7 @@ pub enum EncodeErrorKind {
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "kebab-case")]
+#[cfg_attr(feature = "unstable-schema", derive(schemars::JsonSchema))]
 pub struct EncodableResolve {
     pub version: Option<u32>,
     pub package: Option<Vec<EncodableDependency>>,
@@ -53,6 +54,7 @@ pub type Metadata = BTreeMap<String, String>;
 
 #[derive(Serialize, Deserialize, Debug, Default)]
 #[serde(rename_all = "kebab-case")]
+#[cfg_attr(feature = "unstable-schema", derive(schemars::JsonSchema))]
 pub struct EncodablePatch {
     pub unused: Vec<EncodableDependency>,
 }
@@ -65,6 +67,7 @@ impl EncodablePatch {
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "kebab-case")]
+#[cfg_attr(feature = "unstable-schema", derive(schemars::JsonSchema))]
 pub struct EncodableDependency {
     pub name: String,
     pub version: String,
@@ -75,6 +78,7 @@ pub struct EncodableDependency {
 }
 
 #[derive(Debug)]
+#[cfg_attr(feature = "unstable-schema", derive(schemars::JsonSchema))]
 pub struct EncodablePackageId {
     pub name: String,
     pub version: Option<String>,
@@ -144,8 +148,11 @@ impl<'de> Deserialize<'de> for EncodablePackageId {
 }
 
 #[derive(Debug)]
+#[cfg_attr(feature = "unstable-schema", derive(schemars::JsonSchema))]
 pub struct EncodableSourceId {
+    #[cfg_attr(feature = "unstable-schema", schemars(with = "String"))]
     pub url: Url,
+    #[cfg_attr(feature = "unstable-schema", schemars(with = "String"))]
     pub kind: SourceKind,
     pub encoded: bool,
 }

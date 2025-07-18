@@ -5,6 +5,7 @@ use std::path::PathBuf;
 use anyhow::Context as _;
 use cargo::util::Filesystem;
 use cargo::{CargoResult, GlobalContext};
+use cargo_plumbing_schemas::read_lockfile::ReadLockfileMessage;
 use cargo_plumbing_schemas::resolve::EncodableResolve;
 
 #[derive(Debug, clap::Args)]
@@ -26,7 +27,9 @@ pub(crate) fn exec(gctx: &GlobalContext, args: Args) -> CargoResult<()> {
         .with_context(|| format!("failed to read file: {}", lock_f.path().display()))?;
 
     let v: EncodableResolve = toml::from_str(&lock_s)?;
-    gctx.shell().print_json(&v)?;
+
+    let msg = ReadLockfileMessage::Lockfile { lockfile: v };
+    gctx.shell().print_json(&msg)?;
 
     Ok(())
 }
