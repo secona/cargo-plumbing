@@ -38,38 +38,26 @@ fn package_with_deps() {
             str![[r#"
 [
   {
-    "metadata": null,
-    "package": [
-      {
-        "checksum": "3a351dafbc8a3a9cba7c06dfe8caa11a3a45f800a336bb5b913a8f1e2652d454",
-        "dependencies": null,
-        "name": "a",
-        "replace": null,
-        "source": "registry+https://github.com/rust-lang/crates.io-index",
-        "version": "1.0.0"
-      },
-      {
-        "checksum": "909035bb08757fa6f58bf655da5337acb736003f7301533602d348a329097837",
-        "dependencies": null,
-        "name": "b",
-        "replace": null,
-        "source": "registry+https://github.com/rust-lang/crates.io-index",
-        "version": "1.0.0"
-      },
-      {
-        "checksum": null,
-        "dependencies": [
-          "a",
-          "b"
-        ],
-        "name": "read-lockfile-test",
-        "replace": null,
-        "source": null,
-        "version": "0.1.0"
-      }
-    ],
-    "root": null,
+    "reason": "lockfile",
     "version": 4
+  },
+  {
+    "reason": "locked-package",
+    "id": "registry+https://github.com/rust-lang/crates.io-index#a@1.0.0",
+    "checksum": "3a351dafbc8a3a9cba7c06dfe8caa11a3a45f800a336bb5b913a8f1e2652d454"
+  },
+  {
+    "reason": "locked-package",
+    "id": "registry+https://github.com/rust-lang/crates.io-index#b@1.0.0",
+    "checksum": "909035bb08757fa6f58bf655da5337acb736003f7301533602d348a329097837"
+  },
+  {
+    "reason": "locked-package",
+    "id": "read-lockfile-test@0.1.0",
+    "dependencies": [
+      "a",
+      "b"
+    ]
   }
 ]
 "#]]
@@ -112,40 +100,29 @@ fn package_with_transitive_deps() {
             str![[r#"
 [
   {
-    "metadata": null,
-    "package": [
-      {
-        "checksum": "3a351dafbc8a3a9cba7c06dfe8caa11a3a45f800a336bb5b913a8f1e2652d454",
-        "dependencies": null,
-        "name": "a",
-        "replace": null,
-        "source": "registry+https://github.com/rust-lang/crates.io-index",
-        "version": "1.0.0"
-      },
-      {
-        "checksum": "ee3b274199c39817bfb6018e6cbe07ca43dd18241c42400d800e2545b77fb23b",
-        "dependencies": [
-          "a"
-        ],
-        "name": "b",
-        "replace": null,
-        "source": "registry+https://github.com/rust-lang/crates.io-index",
-        "version": "1.0.0"
-      },
-      {
-        "checksum": null,
-        "dependencies": [
-          "a",
-          "b"
-        ],
-        "name": "read-lockfile-test",
-        "replace": null,
-        "source": null,
-        "version": "0.1.0"
-      }
-    ],
-    "root": null,
+    "reason": "lockfile",
     "version": 4
+  },
+  {
+    "reason": "locked-package",
+    "id": "registry+https://github.com/rust-lang/crates.io-index#a@1.0.0",
+    "checksum": "3a351dafbc8a3a9cba7c06dfe8caa11a3a45f800a336bb5b913a8f1e2652d454"
+  },
+  {
+    "reason": "locked-package",
+    "id": "registry+https://github.com/rust-lang/crates.io-index#b@1.0.0",
+    "checksum": "ee3b274199c39817bfb6018e6cbe07ca43dd18241c42400d800e2545b77fb23b",
+    "dependencies": [
+      "a"
+    ]
+  },
+  {
+    "reason": "locked-package",
+    "id": "read-lockfile-test@0.1.0",
+    "dependencies": [
+      "a",
+      "b"
+    ]
   }
 ]
 "#]]
@@ -195,29 +172,19 @@ fn package_with_path_deps() {
             str![[r#"
 [
   {
-    "metadata": null,
-    "package": [
-      {
-        "checksum": null,
-        "dependencies": null,
-        "name": "a",
-        "replace": null,
-        "source": null,
-        "version": "0.1.0"
-      },
-      {
-        "checksum": null,
-        "dependencies": [
-          "a"
-        ],
-        "name": "read-lockfile-test",
-        "replace": null,
-        "source": null,
-        "version": "0.1.0"
-      }
-    ],
-    "root": null,
+    "reason": "lockfile",
     "version": 4
+  },
+  {
+    "reason": "locked-package",
+    "id": "a@0.1.0"
+  },
+  {
+    "reason": "locked-package",
+    "id": "read-lockfile-test@0.1.0",
+    "dependencies": [
+      "a"
+    ]
   }
 ]
 "#]]
@@ -299,83 +266,55 @@ fn package_with_varying_deps_sources() {
             str![[r#"
 [
   {
-    "version": 4,
-    "package": [
-      {
-        "name": "a",
-        "version": "1.0.0",
-        "source": null,
-        "checksum": null,
-        "dependencies": null,
-        "replace": null
-      },
-      {
-        "name": "a",
-        "version": "1.0.0",
-        "source": "registry+https://github.com/rust-lang/crates.io-index",
-        "checksum": "3a351dafbc8a3a9cba7c06dfe8caa11a3a45f800a336bb5b913a8f1e2652d454",
-        "dependencies": null,
-        "replace": null
-      },
-      {
-        "name": "a",
-        "version": "1.0.0",
-        "source": "sparse+http://127.0.0.1:[..]/index/",
-        "checksum": "3a351dafbc8a3a9cba7c06dfe8caa11a3a45f800a336bb5b913a8f1e2652d454",
-        "dependencies": null,
-        "replace": null
-      },
-      {
-        "name": "a",
-        "version": "1.0.0",
-        "source": "git+[ROOTURL]/my-git-repo?rev=v1.0.0#[..]",
-        "checksum": null,
-        "dependencies": null,
-        "replace": null
-      },
-      {
-        "name": "a",
-        "version": "2.0.0",
-        "source": "registry+https://github.com/rust-lang/crates.io-index",
-        "checksum": "50bc2065af6476063cea5b8d28dc20df4c7ad146759b4712b5e86a6d25d74ddc",
-        "dependencies": null,
-        "replace": null
-      },
-      {
-        "name": "a",
-        "version": "2.0.0",
-        "source": "git+[ROOTURL]/my-git-repo?rev=v2.0.0#[..]",
-        "checksum": null,
-        "dependencies": null,
-        "replace": null
-      },
-      {
-        "name": "a",
-        "version": "2.0.0",
-        "source": "git+[ROOTURL]/my-git-repo#[..]",
-        "checksum": null,
-        "dependencies": null,
-        "replace": null
-      },
-      {
-        "name": "read-lockfile-test",
-        "version": "0.1.0",
-        "source": null,
-        "checksum": null,
-        "dependencies": [
-          "a 1.0.0",
-          "a 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
-          "a 1.0.0 (sparse+http://127.0.0.1:[..]/index/)",
-          "a 1.0.0 (git+[ROOTURL]/my-git-repo?rev=v1.0.0)",
-          "a 2.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
-          "a 2.0.0 (git+[ROOTURL]/my-git-repo?rev=v2.0.0)",
-          "a 2.0.0 (git+[ROOTURL]/my-git-repo)"
-        ],
-        "replace": null
-      }
-    ],
-    "root": null,
-    "metadata": null
+    "reason": "lockfile",
+    "version": 4
+  },
+  {
+    "reason": "locked-package",
+    "id": "a@1.0.0"
+  },
+  {
+    "reason": "locked-package",
+    "id": "registry+https://github.com/rust-lang/crates.io-index#a@1.0.0",
+    "checksum": "3a351dafbc8a3a9cba7c06dfe8caa11a3a45f800a336bb5b913a8f1e2652d454"
+  },
+  {
+    "reason": "locked-package",
+    "id": "sparse+http://127.0.0.1:[..]/index/#a@1.0.0",
+    "checksum": "3a351dafbc8a3a9cba7c06dfe8caa11a3a45f800a336bb5b913a8f1e2652d454"
+  },
+  {
+    "reason": "locked-package",
+    "id": "git+[ROOTURL]/my-git-repo?rev=v1.0.0#a@1.0.0",
+    "rev": "[..]"
+  },
+  {
+    "reason": "locked-package",
+    "id": "registry+https://github.com/rust-lang/crates.io-index#a@2.0.0",
+    "checksum": "50bc2065af6476063cea5b8d28dc20df4c7ad146759b4712b5e86a6d25d74ddc"
+  },
+  {
+    "reason": "locked-package",
+    "id": "git+[ROOTURL]/my-git-repo?rev=v2.0.0#a@2.0.0",
+    "rev": "[..]"
+  },
+  {
+    "reason": "locked-package",
+    "id": "git+[ROOTURL]/my-git-repo#a@2.0.0",
+    "rev": "[..]"
+  },
+  {
+    "reason": "locked-package",
+    "id": "read-lockfile-test@0.1.0",
+    "dependencies": [
+      "a@1.0.0",
+      "registry+https://github.com/rust-lang/crates.io-index#a@1.0.0",
+      "sparse+http://127.0.0.1:[..]/index/#a@1.0.0",
+      "git+[ROOTURL]/my-git-repo?rev=v1.0.0#a@1.0.0",
+      "registry+https://github.com/rust-lang/crates.io-index#a@2.0.0",
+      "git+[ROOTURL]/my-git-repo?rev=v2.0.0#a@2.0.0",
+      "git+[ROOTURL]/my-git-repo#a@2.0.0"
+    ]
   }
 ]
 "#]]
@@ -430,41 +369,28 @@ fn package_with_unused_patches() {
             str![[r#"
 [
   {
-    "metadata": null,
-    "package": [
-      {
-        "checksum": "3a351dafbc8a3a9cba7c06dfe8caa11a3a45f800a336bb5b913a8f1e2652d454",
-        "dependencies": null,
-        "name": "a",
-        "replace": null,
-        "source": "registry+https://github.com/rust-lang/crates.io-index",
-        "version": "1.0.0"
-      },
-      {
-        "checksum": null,
-        "dependencies": [
-          "a"
-        ],
-        "name": "read-lockfile-test",
-        "replace": null,
-        "source": null,
-        "version": "0.1.0"
-      }
-    ],
-    "patch": {
-      "unused": [
-        {
-          "checksum": null,
-          "dependencies": null,
-          "name": "a",
-          "replace": null,
-          "source": null,
-          "version": "2.0.0"
-        }
-      ]
-    },
-    "root": null,
+    "reason": "lockfile",
     "version": 4
+  },
+  {
+    "reason": "locked-package",
+    "id": "registry+https://github.com/rust-lang/crates.io-index#a@1.0.0",
+    "checksum": "3a351dafbc8a3a9cba7c06dfe8caa11a3a45f800a336bb5b913a8f1e2652d454"
+  },
+  {
+    "reason": "locked-package",
+    "id": "read-lockfile-test@0.1.0",
+    "dependencies": [
+      "a"
+    ]
+  },
+  {
+    "reason": "unused-patches",
+    "unused": [
+      {
+        "id": "a@2.0.0"
+      }
+    ]
   }
 ]
 "#]]
@@ -521,38 +447,26 @@ fn workspace_member_with_inherited_deps() {
             str![[r#"
 [
   {
-    "metadata": null,
-    "package": [
-      {
-        "checksum": "3a351dafbc8a3a9cba7c06dfe8caa11a3a45f800a336bb5b913a8f1e2652d454",
-        "dependencies": null,
-        "name": "a",
-        "replace": null,
-        "source": "registry+https://github.com/rust-lang/crates.io-index",
-        "version": "1.0.0"
-      },
-      {
-        "checksum": "909035bb08757fa6f58bf655da5337acb736003f7301533602d348a329097837",
-        "dependencies": null,
-        "name": "b",
-        "replace": null,
-        "source": "registry+https://github.com/rust-lang/crates.io-index",
-        "version": "1.0.0"
-      },
-      {
-        "checksum": null,
-        "dependencies": [
-          "a",
-          "b"
-        ],
-        "name": "crate1",
-        "replace": null,
-        "source": null,
-        "version": "0.1.0"
-      }
-    ],
-    "root": null,
+    "reason": "lockfile",
     "version": 4
+  },
+  {
+    "reason": "locked-package",
+    "id": "registry+https://github.com/rust-lang/crates.io-index#a@1.0.0",
+    "checksum": "3a351dafbc8a3a9cba7c06dfe8caa11a3a45f800a336bb5b913a8f1e2652d454"
+  },
+  {
+    "reason": "locked-package",
+    "id": "registry+https://github.com/rust-lang/crates.io-index#b@1.0.0",
+    "checksum": "909035bb08757fa6f58bf655da5337acb736003f7301533602d348a329097837"
+  },
+  {
+    "reason": "locked-package",
+    "id": "crate1@0.1.0",
+    "dependencies": [
+      "a",
+      "b"
+    ]
   }
 ]
 "#]]
@@ -609,38 +523,25 @@ fn workspace_package_depend_on_workspace_member() {
             str![[r#"
 [
   {
-    "metadata": null,
-    "package": [
-      {
-        "checksum": "3a351dafbc8a3a9cba7c06dfe8caa11a3a45f800a336bb5b913a8f1e2652d454",
-        "dependencies": null,
-        "name": "a",
-        "replace": null,
-        "source": "registry+https://github.com/rust-lang/crates.io-index",
-        "version": "1.0.0"
-      },
-      {
-        "checksum": null,
-        "dependencies": null,
-        "name": "crate1",
-        "replace": null,
-        "source": null,
-        "version": "0.1.0"
-      },
-      {
-        "checksum": null,
-        "dependencies": [
-          "a",
-          "crate1"
-        ],
-        "name": "read-lockfile-test",
-        "replace": null,
-        "source": null,
-        "version": "0.1.0"
-      }
-    ],
-    "root": null,
+    "reason": "lockfile",
     "version": 4
+  },
+  {
+    "reason": "locked-package",
+    "id": "registry+https://github.com/rust-lang/crates.io-index#a@1.0.0",
+    "checksum": "3a351dafbc8a3a9cba7c06dfe8caa11a3a45f800a336bb5b913a8f1e2652d454"
+  },
+  {
+    "reason": "locked-package",
+    "id": "crate1@0.1.0"
+  },
+  {
+    "reason": "locked-package",
+    "id": "read-lockfile-test@0.1.0",
+    "dependencies": [
+      "a",
+      "crate1"
+    ]
   }
 ]
 "#]]
@@ -700,30 +601,23 @@ fn old_lockfile() {
             str![[r#"
 [
   {
-    "version": null,
-    "package": [
-      {
-        "name": "a",
-        "version": "0.1.0",
-        "source": "registry+https://github.com/rust-lang/crates.io-index",
-        "checksum": null,
-        "dependencies": null,
-        "replace": null
-      }
-    ],
-    "root": {
-      "name": "foo",
-      "version": "0.0.1",
-      "source": null,
-      "checksum": null,
-      "dependencies": [
-        "bar 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)"
-      ],
-      "replace": null
-    },
-    "metadata": {
-      "checksum a 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)": "3436ae58a84bb2033accec0cb50c6611f312249899579714793e0d0509470cd9"
-    }
+    "reason": "lockfile",
+    "version": null
+  },
+  {
+    "reason": "locked-package",
+    "id": "registry+https://github.com/rust-lang/crates.io-index#a@0.1.0"
+  },
+  {
+    "reason": "locked-package",
+    "id": "foo@0.0.1",
+    "dependencies": [
+      "registry+https://github.com/rust-lang/crates.io-index#bar@0.1.0"
+    ]
+  },
+  {
+    "reason": "metadata",
+    "checksum a 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)": "3436ae58a84bb2033accec0cb50c6611f312249899579714793e0d0509470cd9"
   }
 ]
 "#]]
@@ -842,39 +736,10 @@ fn bad_lockfile_invalid_semver() {
     p.cargo_plumbing("plumbing read-lockfile")
         .arg("--lockfile-path")
         .arg(p.root().join("Cargo.lock"))
-        .with_status(0)
-        .with_stdout_data(
-            str![[r#"
-[
-  {
-    "metadata": null,
-    "package": [
-      {
-        "checksum": "3a351dafbc8a3a9cba7c06dfe8caa11a3a45f800a336bb5b913a8f1e2652d454",
-        "dependencies": null,
-        "name": "a",
-        "replace": null,
-        "source": "registry+https://github.com/rust-lang/crates.io-index",
-        "version": "1.0.0.0.0.0.0.0.0.0.0"
-      },
-      {
-        "checksum": null,
-        "dependencies": [
-          "a"
-        ],
-        "name": "read-lockfile-test",
-        "replace": null,
-        "source": null,
-        "version": "0.1.0"
-      }
-    ],
-    "root": null,
-    "version": 4
-  }
-]
-"#]]
-            .is_json()
-            .against_jsonlines(),
-        )
+        .with_status(101)
+        .with_stderr_data(str![[r#"
+[ERROR] expected a version like "1.32"
+
+"#]])
         .run();
 }

@@ -7,8 +7,11 @@ use std::fmt;
 use std::str::FromStr;
 
 use cargo::{
-    core::{GitReference, SourceKind},
+    core::{GitReference, PackageIdSpec, SourceKind},
     CargoResult,
+};
+use cargo_plumbing_schemas::lockfile::{
+    NormalizedDependency, NormalizedPatch, NormalizedResolve, Precise,
 };
 use serde::{de, ser, Deserialize, Serialize};
 use url::Url;
@@ -16,7 +19,7 @@ use url::Url;
 /// The `Cargo.lock` structure.
 #[derive(Serialize, Deserialize, Debug)]
 pub struct EncodableResolve {
-    version: Option<u32>,
+    pub version: Option<u32>,
     package: Option<Vec<EncodableDependency>>,
     /// `root` is optional to allow backward compatibility.
     root: Option<EncodableDependency>,
@@ -30,26 +33,43 @@ struct Patch {
     unused: Vec<EncodableDependency>,
 }
 
-pub type Metadata = BTreeMap<String, String>;
+impl EncodableResolve {
+    pub fn normalize(self) -> CargoResult<NormalizedResolve> {
+        let mut package = if let Some(package) = self.package {
+            package
+                .into_iter()
+                .map(|p| p.normalize())
+                .collect::<Result<Vec<_>, _>>()?
+        } else {
+            Vec::new()
+        };
 
-impl Patch {
-    fn is_empty(&self) -> bool {
-        self.unused.is_empty()
+        if let Some(root) = self.root {
+            package.push(root.normalize()?);
+        }
+
+        Ok(NormalizedResolve {
+            package,
+            metadata: self.metadata,
+            patch: self.patch.normalize()?,
+        })
     }
 }
 
-#[derive(Eq, PartialEq, Clone, Debug, Hash)]
-pub enum Precise {
-    Locked,
-    GitUrlFragment(String),
-}
+pub type Metadata = BTreeMap<String, String>;
 
-impl fmt::Display for Precise {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Precise::Locked => "locked".fmt(f),
-            Precise::GitUrlFragment(s) => s.fmt(f),
-        }
+impl Patch {
+    pub(crate) fn normalize(self) -> CargoResult<NormalizedPatch> {
+        let unused = self
+            .unused
+            .into_iter()
+            .map(|u| u.normalize())
+            .collect::<Result<Vec<_>, _>>()?;
+        Ok(NormalizedPatch { unused })
+    }
+
+    fn is_empty(&self) -> bool {
+        self.unused.is_empty()
     }
 }
 
@@ -61,6 +81,45 @@ pub struct EncodableDependency {
     checksum: Option<String>,
     dependencies: Option<Vec<EncodablePackageId>>,
     replace: Option<EncodablePackageId>,
+}
+
+impl EncodableDependency {
+    pub fn normalize(self) -> CargoResult<NormalizedDependency> {
+        let mut id = PackageIdSpec::new(self.name).with_version(self.version.parse()?);
+        let mut source = None;
+
+        if let Some(s) = self.source {
+            id = id.with_url(s.url.clone()).with_kind(s.kind.clone());
+            source = Some(s);
+        }
+
+        let dependencies = match self.dependencies {
+            Some(deps) => Some(
+                deps.into_iter()
+                    .map(|d| d.normalize())
+                    .collect::<Result<Vec<_>, _>>()?,
+            ),
+            None => None,
+        };
+
+        let replace = match self.replace {
+            Some(replace) => Some(replace.normalize()?),
+            None => None,
+        };
+
+        let rev = match source {
+            Some(s) if matches!(s.kind, SourceKind::Git(..)) => s.precise,
+            _ => None,
+        };
+
+        Ok(NormalizedDependency {
+            id,
+            rev,
+            checksum: self.checksum,
+            dependencies,
+            replace,
+        })
+    }
 }
 
 #[derive(Debug)]
@@ -187,6 +246,22 @@ pub struct EncodablePackageId {
     name: String,
     version: Option<String>,
     source: Option<EncodableSourceId>,
+}
+
+impl EncodablePackageId {
+    pub fn normalize(self) -> CargoResult<PackageIdSpec> {
+        let mut id = PackageIdSpec::new(self.name);
+
+        if let Some(version) = self.version {
+            id = id.with_version(version.parse()?);
+        }
+
+        if let Some(source) = self.source {
+            id = id.with_url(source.url).with_kind(source.kind);
+        }
+
+        Ok(id)
+    }
 }
 
 impl fmt::Display for EncodablePackageId {
