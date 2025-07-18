@@ -2,9 +2,13 @@
 
 use std::{collections::BTreeMap, fmt, str::FromStr};
 
-use cargo_util_schemas::core::{GitReference, SourceKind};
+use cargo_util_schemas::core::{GitReference, PackageIdSpec, PartialVersionError, SourceKind};
 use serde::{de, ser, Deserialize, Serialize};
 use url::Url;
+
+use crate::read_lockfile::{
+    NormalizedDependency, NormalizedPatch, NormalizedResolve, NormalizedSourceId,
+};
 
 #[derive(Debug, thiserror::Error)]
 #[error(transparent)]
@@ -24,6 +28,12 @@ enum UrlParseErrorKind {
 pub enum EncodeError {
     Encode(#[from] EncodeErrorKind),
     UrlParse(#[from] UrlParseError),
+}
+
+#[derive(Debug, thiserror::Error)]
+#[error(transparent)]
+pub enum NormalizeError {
+    PartialVersion(#[from] PartialVersionError),
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -49,6 +59,29 @@ pub struct EncodableResolve {
     pub patch: EncodablePatch,
 }
 
+impl EncodableResolve {
+    pub fn normalize(self) -> Result<NormalizedResolve, NormalizeError> {
+        let mut package = if let Some(package) = self.package {
+            package
+                .into_iter()
+                .map(|p| p.normalize())
+                .collect::<Result<Vec<_>, _>>()?
+        } else {
+            Vec::new()
+        };
+
+        if let Some(root) = self.root {
+            package.push(root.normalize()?);
+        }
+
+        Ok(NormalizedResolve {
+            package,
+            metadata: self.metadata,
+            patch: self.patch.normalize()?,
+        })
+    }
+}
+
 pub type Metadata = BTreeMap<String, String>;
 
 #[derive(Serialize, Deserialize, Debug, Default)]
@@ -58,6 +91,15 @@ pub struct EncodablePatch {
 }
 
 impl EncodablePatch {
+    pub fn normalize(self) -> Result<NormalizedPatch, NormalizeError> {
+        let unused = self
+            .unused
+            .into_iter()
+            .map(|u| u.normalize())
+            .collect::<Result<Vec<_>, _>>()?;
+        Ok(NormalizedPatch { unused })
+    }
+
     fn is_empty(&self) -> bool {
         self.unused.is_empty()
     }
@@ -74,11 +116,61 @@ pub struct EncodableDependency {
     pub replace: Option<EncodablePackageId>,
 }
 
+impl EncodableDependency {
+    pub fn normalize(self) -> Result<NormalizedDependency, NormalizeError> {
+        let mut id = PackageIdSpec::new(self.name).with_version(self.version.parse()?);
+        let mut source = None;
+
+        if let Some(s) = self.source {
+            id = id.with_url(s.url.clone()).with_kind(s.kind.clone());
+            source = Some(s.normalize());
+        }
+
+        let dependencies = match self.dependencies {
+            Some(deps) => Some(
+                deps.into_iter()
+                    .map(|d| d.normalize())
+                    .collect::<Result<Vec<_>, _>>()?,
+            ),
+            None => None,
+        };
+
+        let replace = match self.replace {
+            Some(replace) => Some(replace.normalize()?),
+            None => None,
+        };
+
+        Ok(NormalizedDependency {
+            id,
+            source,
+            checksum: self.checksum,
+            dependencies,
+            replace,
+        })
+    }
+}
+
 #[derive(Debug)]
 pub struct EncodablePackageId {
     pub name: String,
     pub version: Option<String>,
     pub source: Option<EncodableSourceId>,
+}
+
+impl EncodablePackageId {
+    pub fn normalize(self) -> Result<PackageIdSpec, NormalizeError> {
+        let mut id = PackageIdSpec::new(self.name);
+
+        if let Some(version) = self.version {
+            id = id.with_version(version.parse()?);
+        }
+
+        if let Some(source) = self.source {
+            id = id.with_url(source.url).with_kind(source.kind);
+        }
+
+        Ok(id)
+    }
 }
 
 impl fmt::Display for EncodablePackageId {
@@ -227,6 +319,14 @@ impl EncodableSourceId {
 
     fn is_path(&self) -> bool {
         self.kind == SourceKind::Path
+    }
+
+    pub fn normalize(self) -> NormalizedSourceId {
+        NormalizedSourceId {
+            url: self.url,
+            kind: self.kind,
+            precise: self.precise,
+        }
     }
 }
 
