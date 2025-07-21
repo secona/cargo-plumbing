@@ -20,3 +20,6 @@ serde-untagged.workspace = true
 
 [dev-dependencies]
 snapbox.workspace = true
+
+[lints]
+workspace = true
