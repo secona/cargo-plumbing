@@ -155,6 +155,7 @@ clap = { workspace = true, features = ["derive"] }
 clap-cargo.workspace = true
 semver.workspace = true
 serde = { workspace = true, features = ["derive"] }
+serde_json.workspace = true
 serde-untagged.workspace = true
 toml.workspace = true
 url = { workspace = true, features = ["serde"] }

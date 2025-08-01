@@ -1,4 +1,5 @@
-use std::env;
+use std::io::{BufRead, BufReader};
+use std::{env, io};
 use std::fmt::Debug;
 use std::path::PathBuf;
 
@@ -14,6 +15,8 @@ use cargo_plumbing::cargo::core::resolver::encode::{
 };
 use cargo_plumbing_schemas::lock_dependencies::LockDependenciesMessage;
 use cargo_plumbing_schemas::lockfile::NormalizedPatch;
+use cargo_plumbing_schemas::read_manifest::ReadManifestMessage;
+use serde_json::from_str;
 
 #[derive(Debug, clap::Args)]
 pub(crate) struct Args {
@@ -23,6 +26,28 @@ pub(crate) struct Args {
 }
 
 pub(crate) fn exec(gctx: &GlobalContext, args: Args) -> CargoResult<()> {
+    let stdin = io::stdin();
+    let reader = BufReader::new(stdin.lock());
+
+    let mut root = None;
+    let mut member_paths = Vec::new();
+
+    for line in reader.lines().map_while(Result::ok) {
+        if let Ok(message) = from_str::<ReadManifestMessage>(&line) {
+            match message {
+                ReadManifestMessage::Manifest { path, manifest, ..  } => {
+                    if manifest.workspace.is_some() {
+                        root = Some(path);
+                    } else {
+                        member_paths.push(path);
+                    }
+                },
+            }
+        }
+    }
+
+    let _ = root; // unused for now
+
     let manifest_path = args
         .manifest_path
         .unwrap_or(env::current_dir()?.join("Cargo.toml"));
