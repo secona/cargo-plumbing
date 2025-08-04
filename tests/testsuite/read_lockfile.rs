@@ -764,10 +764,7 @@ fn invalid_lockfile_name() {
         .arg(p.root().join("invalid-Cargo.lock"))
         .with_status(101)
         .with_stderr_data(str![[r#"
-[ERROR] failed to open: [ROOT]/foo/Cargo.lock
-
-Caused by:
-  [NOT_FOUND]
+[ERROR] lockfile name should be `Cargo.lock`
 
 "#]])
         .run();

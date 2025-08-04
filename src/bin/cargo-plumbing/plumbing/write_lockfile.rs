@@ -17,6 +17,13 @@ pub(crate) struct Args {
 }
 
 pub(crate) fn exec(gctx: &mut GlobalContext, args: Args) -> CargoResult<()> {
+    let lock_path = gctx.cwd().join(args.lockfile_path);
+    if let Some(file_name) = lock_path.file_name() {
+        if file_name != "Cargo.lock" {
+            anyhow::bail!("lockfile name should be `Cargo.lock`");
+        }
+    }
+
     let stdin = io::stdin();
     if stdin.is_terminal() {
         anyhow::bail!("input must be piped from a file or another command");
@@ -37,7 +44,6 @@ pub(crate) fn exec(gctx: &mut GlobalContext, args: Args) -> CargoResult<()> {
         }
     }
 
-    let lock_path = gctx.cwd().join(args.lockfile_path);
     let root = lock_path.parent().expect("Lockfile path can't be root");
     let lock_root = Filesystem::new(root.to_owned());
 
