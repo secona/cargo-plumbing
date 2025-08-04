@@ -3,7 +3,7 @@ use cargo_test_support::compare::assert_e2e;
 use cargo_test_support::registry::{Package, RegistryBuilder};
 use cargo_test_support::{basic_manifest, git, project, str};
 
-use crate::ProjectExt;
+use crate::{assert_not_exists, ProjectExt};
 
 #[cargo_test]
 fn package_with_deps() {
@@ -603,4 +603,44 @@ dependencies = [
 
 "##]],
     );
+}
+
+#[cargo_test]
+fn invalid_lockfile_name() {
+    let p = project()
+        .file("src/lib.rs", "")
+        .file(
+            "Cargo.toml",
+            r#"
+                [package]
+                name = "write-lockfile-tests"
+                version = "0.1.0"
+                authors = []
+                edition = "2024"
+            "#,
+        )
+        .build();
+
+    let out = p
+        .cargo_plumbing("plumbing lock-dependencies")
+        .arg("--manifest-path")
+        .arg(p.root().join("Cargo.toml"))
+        .exec_with_output()
+        .unwrap();
+    let stdout = String::from_utf8(out.stdout).unwrap();
+
+    p.cargo_plumbing("plumbing write-lockfile")
+        .arg("--lockfile-path")
+        .arg(p.root().join("invalid-Cargo.lock"))
+        .with_stdin(stdout)
+        .with_status(101)
+        .with_stdout_data(str![[""]])
+        .with_stderr_data(str![[r#"
+[ERROR] lockfile name should be `Cargo.lock`
+
+"#]])
+        .run();
+
+    assert_not_exists(&p.root().join("invalid-Cargo.lock"));
+    assert_not_exists(&p.root().join("Cargo.lock"));
 }

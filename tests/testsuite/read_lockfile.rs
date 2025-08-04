@@ -743,3 +743,29 @@ fn bad_lockfile_invalid_semver() {
 "#]])
         .run();
 }
+
+#[cargo_test]
+fn invalid_lockfile_name() {
+    let p = project()
+        .file(
+            "invalid-Cargo.lock",
+            r#"
+                version = 4
+
+                [[package]]
+                name = "read-lockfile-test"
+                version = "0.1.0"
+            "#,
+        )
+        .build();
+
+    p.cargo_plumbing("plumbing read-lockfile")
+        .arg("--lockfile-path")
+        .arg(p.root().join("invalid-Cargo.lock"))
+        .with_status(101)
+        .with_stderr_data(str![[r#"
+[ERROR] lockfile name should be `Cargo.lock`
+
+"#]])
+        .run();
+}
