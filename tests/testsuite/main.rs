@@ -58,3 +58,21 @@ impl CargoCommandExt for snapbox::cmd::Command {
             .test_env()
     }
 }
+
+#[track_caller]
+pub fn assert_exists(path: &std::path::Path) {
+    assert!(
+        path.exists(),
+        "Expected `{}` to exist but was not found.",
+        path.display()
+    );
+}
+
+#[track_caller]
+pub fn assert_not_exists(path: &std::path::Path) {
+    assert!(
+        !path.exists(),
+        "Expected `{}` to NOT exist but was found.",
+        path.display()
+    );
+}
