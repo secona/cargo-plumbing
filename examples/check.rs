@@ -4,7 +4,8 @@ use std::process::{Command, Stdio};
 
 use cargo::CargoResult;
 use cargo_plumbing_schemas::locate_manifest::LocateManifestOut;
-use cargo_plumbing_schemas::read_manifest::{ReadManifestOut, TomlManifest};
+use cargo_plumbing_schemas::read_manifest::ReadManifestOut;
+use cargo_plumbing_schemas::resolve_features::ResolveFeaturesIn;
 use clap::Parser;
 
 #[derive(Debug, Parser)]
@@ -15,6 +16,33 @@ struct Args {
     lockfile_path: Option<PathBuf>,
     #[arg(long, default_value_t = false)]
     workspace: bool,
+    #[arg(long, short = 'F')]
+    features: Vec<String>,
+    #[arg(long)]
+    all_features: bool,
+    #[arg(long)]
+    no_default_features: bool,
+
+    #[arg(long)]
+    lib: bool,
+    #[arg(long)]
+    bins: bool,
+    #[arg(long)]
+    bin: Vec<String>,
+    #[arg(long)]
+    examples: bool,
+    #[arg(long)]
+    example: Vec<String>,
+    #[arg(long)]
+    tests: bool,
+    #[arg(long)]
+    test: Vec<String>,
+    #[arg(long)]
+    benches: bool,
+    #[arg(long)]
+    bench: Vec<String>,
+    #[arg(long)]
+    all_targets: bool,
 }
 
 fn run(args: &Args) -> CargoResult<()> {
@@ -48,7 +76,7 @@ fn run(args: &Args) -> CargoResult<()> {
         manifest_path.expect("failed to get manifest_path")
     };
 
-    let (_manifests, paths): (Vec<TomlManifest>, Vec<PathBuf>) = {
+    let manifests: Vec<ReadManifestOut> = {
         let mut cmd = Command::new("cargo");
         cmd.args(["run", "plumbing", "read-manifest"])
             .args(["--manifest-path", manifest_path.as_str()])
@@ -62,16 +90,14 @@ fn run(args: &Args) -> CargoResult<()> {
         let stdout = child.stdout.take().expect("failed to get stdout");
         let messages = ReadManifestOut::parse_stream(BufReader::new(stdout));
 
-        let outputs = messages.map(|message| match message.expect("failed to parse message") {
-            ReadManifestOut::Manifest { manifest, path, .. } => (manifest, path),
-        });
-
         child.wait().expect("failed to wait for read-manifest");
-        outputs.collect()
+        messages.collect::<Result<Vec<_>, _>>()?
     };
 
     let lockfile_path = args.lockfile_path.clone().unwrap_or_else(|| {
-        let parent = paths.last().unwrap().parent().unwrap();
+        let parent = match manifests.last().unwrap() {
+            ReadManifestOut::Manifest { path, .. } => path.parent().unwrap(),
+        };
         parent.join("Cargo.lock")
     });
 
@@ -138,6 +164,60 @@ fn run(args: &Args) -> CargoResult<()> {
 
         child.wait().expect("failed to wait for lock-dependencies");
     }
+
+    // HACK: We determine if we should include dev units or not. This workaround is implemented due
+    // to cargo API limitations.
+    //
+    // See: https://github.com/crate-ci/cargo-plumbing/pull/68#discussion_r2277484208
+    let has_dev_units = args.examples
+        || args.tests
+        || args.benches
+        || !args.example.is_empty()
+        || !args.test.is_empty()
+        || !args.bench.is_empty()
+        || args.all_targets;
+
+    let _features = {
+        let ids = manifests
+            .into_iter()
+            .filter_map(|manifest| match manifest {
+                ReadManifestOut::Manifest { pkg_id, .. } => {
+                    pkg_id.map(|id| ResolveFeaturesIn::Manifest { id })
+                }
+            })
+            .map(|msg| serde_json::to_string(&msg))
+            .collect::<Result<Vec<_>, _>>()?
+            .join("\n");
+
+        let mut cmd = Command::new("cargo");
+        cmd.args(["run", "plumbing", "resolve-features"])
+            .stdin(Stdio::piped())
+            .stdout(Stdio::piped());
+
+        if has_dev_units {
+            cmd.arg("--dev-units");
+        }
+
+        let mut child = cmd.spawn().expect("failed to spawn resolve-features");
+
+        {
+            let mut stdin = child.stdin.take().expect("failed to take stdin");
+            stdin
+                .write_all(ids.as_bytes())
+                .expect("failed to write to stdin");
+            stdin
+                .write_all(&locked_deps)
+                .expect("failed to write to stdin");
+        }
+
+        let messages = {
+            let stdout = child.stdout.take().expect("failed to get stdout");
+            LocateManifestOut::parse_stream(BufReader::new(stdout))
+        };
+
+        child.wait().expect("failed to wait for resolve-features");
+        messages.collect::<Result<Vec<_>, _>>()?
+    };
 
     anyhow::bail!("check for {manifest_path} is not implemented!");
 }

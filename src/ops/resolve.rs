@@ -1,6 +1,6 @@
 use std::collections::{BTreeMap, HashMap, HashSet};
 
-use anyhow::Context as _;
+use anyhow::{anyhow, Context as _};
 use cargo::core::{
     PackageId, PackageIdSpec, Resolve, ResolveVersion, SourceId, SourceKind, Workspace,
 };
@@ -205,6 +205,9 @@ pub fn spec_to_id(
                     SourceKind::Registry | SourceKind::SparseRegistry => {
                         SourceId::for_registry(url)
                     }
+                    SourceKind::Path => SourceId::for_path(
+                        &url.to_file_path().map_err(|_| anyhow!("invalid path"))?,
+                    ),
                     _ => anyhow::bail!("unsupported source"),
                 }?;
 

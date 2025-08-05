@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ResolveFeaturesOut",
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/PackageIdSpec"
+        },
+        "features_for": {
+          "type": "string"
+        },
+        "features": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "reason": {
+          "type": "string",
+          "const": "activated"
+        }
+      },
+      "required": [
+        "reason",
+        "id",
+        "features_for",
+        "features"
+      ]
+    }
+  ],
+  "$defs": {
+    "PackageIdSpec": {
+      "type": "string"
+    }
+  }
+}
