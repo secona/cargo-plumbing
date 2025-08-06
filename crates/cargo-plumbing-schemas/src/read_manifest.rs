@@ -8,14 +8,11 @@ use serde::{Deserialize, Serialize};
 
 use crate::MessageIter;
 
-/// Represents the messages outputted by the `cargo-plumbing read-manifest` command.
-///
-/// This enum captures all possible JSON objects that the command can emit. The `reason`
-/// field acts as a discriminant to distinguish between different message types.
+/// Output messages for `cargo-plumbing read-manifest`.
 #[derive(Serialize, Deserialize)]
 #[serde(tag = "reason", rename_all = "kebab-case")]
 #[cfg_attr(feature = "unstable-schema", derive(schemars::JsonSchema))]
-pub enum ReadManifestMessage {
+pub enum ReadManifestOut {
     /// A message containing the contents of a parsed `Cargo.toml` manifest.
     Manifest {
         /// The path to the manifest file that was read.
@@ -34,8 +31,8 @@ pub enum ReadManifestMessage {
     },
 }
 
-impl ReadManifestMessage {
-    /// Creates an iterator to parse a stream of [`ReadManifestMessage`]s.
+impl ReadManifestOut {
+    /// Creates an iterator to parse a stream of [`ReadManifestOut`]s.
     pub fn parse_stream<R: Read>(input: R) -> MessageIter<R, Self> {
         MessageIter {
             input,
@@ -47,7 +44,10 @@ impl ReadManifestMessage {
 #[cfg(feature = "unstable-schema")]
 #[test]
 fn dump_read_manifest_schema() {
-    let schema = schemars::schema_for!(ReadManifestMessage);
+    let schema = schemars::schema_for!(ReadManifestOut);
     let dump = serde_json::to_string_pretty(&schema).unwrap();
-    snapbox::assert_data_eq!(dump, snapbox::file!("../read-manifest.schema.json").raw());
+    snapbox::assert_data_eq!(
+        dump,
+        snapbox::file!("../read-manifest.out.schema.json").raw()
+    );
 }

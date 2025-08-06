@@ -7,14 +7,11 @@ use serde::{Deserialize, Serialize};
 
 use crate::MessageIter;
 
-/// Represents the messages outputted by the `cargo-plumbing locate-manifest` command.
-///
-/// This enum captures all possible JSON objects that the command can emit. The `reason`
-/// field acts as a discriminant to distinguish between different message types.
+/// Output messages for `cargo-plumbing locate-manifest`.
 #[derive(Serialize, Deserialize)]
 #[serde(tag = "reason", rename_all = "kebab-case")]
 #[cfg_attr(feature = "unstable-schema", derive(schemars::JsonSchema))]
-pub enum LocateManifestMessage {
+pub enum LocateManifestOut {
     /// A message containing the location of a found `Cargo.toml` manifest.
     ManifestLocation {
         /// The absolute path to the manifest file.
@@ -23,8 +20,8 @@ pub enum LocateManifestMessage {
     },
 }
 
-impl LocateManifestMessage {
-    /// Creates an iterator to parse a stream of [`LocateManifestMessage`]s.
+impl LocateManifestOut {
+    /// Creates an iterator to parse a stream of [`LocateManifestOut`]s.
     pub fn parse_stream<R: Read>(input: R) -> MessageIter<R, Self> {
         MessageIter {
             input,
@@ -35,8 +32,11 @@ impl LocateManifestMessage {
 
 #[cfg(feature = "unstable-schema")]
 #[test]
-fn dump_project_location_schema() {
-    let schema = schemars::schema_for!(LocateManifestMessage);
+fn dump_locate_manifest_schema() {
+    let schema = schemars::schema_for!(LocateManifestOut);
     let dump = serde_json::to_string_pretty(&schema).unwrap();
-    snapbox::assert_data_eq!(dump, snapbox::file!("../locate-manifest.schema.json").raw());
+    snapbox::assert_data_eq!(
+        dump,
+        snapbox::file!("../locate-manifest.out.schema.json").raw()
+    );
 }
