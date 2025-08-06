@@ -49,7 +49,11 @@ fn package_with_path_deps() {
     p.cargo_plumbing("plumbing resolve-features")
         .with_stdin(stdout)
         .with_status(0)
-        .with_stdout_data(str!["[]"].is_json().against_jsonlines())
+        .with_stdout_data(
+            str!["[]"]
+            .is_json()
+            .against_jsonlines(),
+        )
         .run();
 }
 
@@ -129,6 +133,10 @@ fn package_with_varying_deps_sources() {
     p.cargo_plumbing("plumbing resolve-features")
         .with_stdin(stdout)
         .with_status(0)
-        .with_stdout_data(str!["[]"].is_json().against_jsonlines())
+        .with_stdout_data(
+            str!["[]"]
+            .is_json()
+            .against_jsonlines(),
+        )
         .run();
 }
