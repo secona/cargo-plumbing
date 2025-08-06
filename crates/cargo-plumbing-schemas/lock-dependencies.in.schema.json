@@ -1,0 +1,123 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "LockDependenciesIn",
+  "description": "Input messages for `cargo-plumbing lock-dependencies`.",
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint32",
+          "minimum": 0
+        },
+        "reason": {
+          "type": "string",
+          "const": "lockfile"
+        }
+      },
+      "required": [
+        "reason"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "rev": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "checksum": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "dependencies": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "replace": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "reason": {
+          "type": "string",
+          "const": "locked-package"
+        }
+      },
+      "required": [
+        "reason",
+        "id"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "unused": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/NormalizedDependency"
+          }
+        },
+        "reason": {
+          "type": "string",
+          "const": "unused-patches"
+        }
+      },
+      "required": [
+        "reason",
+        "unused"
+      ]
+    }
+  ],
+  "$defs": {
+    "NormalizedDependency": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "rev": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "checksum": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "dependencies": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "replace": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "id"
+      ]
+    }
+  }
+}

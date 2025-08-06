@@ -7,6 +7,34 @@ use serde::{Deserialize, Serialize};
 use crate::lockfile::{NormalizedDependency, NormalizedPatch};
 use crate::MessageIter;
 
+/// Input messages for `cargo-plumbing lock-dependencies`.
+#[derive(Serialize, Deserialize)]
+#[serde(tag = "reason", rename_all = "kebab-case")]
+#[cfg_attr(feature = "unstable-schema", derive(schemars::JsonSchema))]
+#[allow(clippy::large_enum_variant)]
+pub enum LockDependenciesIn {
+    Lockfile {
+        version: Option<u32>,
+    },
+    LockedPackage {
+        #[serde(flatten)]
+        package: NormalizedDependency,
+    },
+    UnusedPatches {
+        unused: NormalizedPatch,
+    },
+}
+
+impl LockDependenciesIn {
+    /// Creates an iterator to parse a stream of [`LockDependenciesIn`]s.
+    pub fn parse_stream<R: Read>(input: R) -> MessageIter<R, Self> {
+        MessageIter {
+            input,
+            _m: PhantomData::<Self>,
+        }
+    }
+}
+
 /// Output messages for `cargo-plumbing lock-dependencies`.
 #[derive(Serialize, Deserialize)]
 #[serde(tag = "reason", rename_all = "kebab-case")]
@@ -43,5 +71,12 @@ fn dump_lock_dependencies_schema() {
     snapbox::assert_data_eq!(
         dump,
         snapbox::file!("../lock-dependencies.out.schema.json").raw()
+    );
+
+    let schema = schemars::schema_for!(LockDependenciesIn);
+    let dump = serde_json::to_string_pretty(&schema).unwrap();
+    snapbox::assert_data_eq!(
+        dump,
+        snapbox::file!("../lock-dependencies.in.schema.json").raw()
     );
 }
