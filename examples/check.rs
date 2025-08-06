@@ -3,8 +3,8 @@ use std::path::PathBuf;
 use std::process::{Command, Stdio};
 
 use cargo::CargoResult;
-use cargo_plumbing_schemas::locate_manifest::LocateManifestMessage;
-use cargo_plumbing_schemas::read_manifest::{ReadManifestMessage, TomlManifest};
+use cargo_plumbing_schemas::locate_manifest::LocateManifestOut;
+use cargo_plumbing_schemas::read_manifest::{ReadManifestOut, TomlManifest};
 use clap::Parser;
 
 #[derive(Debug, Parser)]
@@ -28,14 +28,14 @@ fn run(args: &Args) -> CargoResult<()> {
 
         let mut child = cmd.spawn().expect("failed to run locate-manifest");
         let stdout = child.stdout.take().expect("failed to get stdout");
-        let messages = LocateManifestMessage::parse_stream(BufReader::new(stdout));
+        let messages = LocateManifestOut::parse_stream(BufReader::new(stdout));
 
         let mut manifest_path: Option<camino::Utf8PathBuf> = None;
 
         #[allow(clippy::never_loop)]
         for message in messages {
             match message.expect("failed to parse message") {
-                LocateManifestMessage::ManifestLocation { manifest_path: m } => {
+                LocateManifestOut::ManifestLocation { manifest_path: m } => {
                     manifest_path = Some(m);
                     break;
                 }
@@ -58,10 +58,10 @@ fn run(args: &Args) -> CargoResult<()> {
 
         let mut child = cmd.spawn().expect("failed to run read-manifest");
         let stdout = child.stdout.take().expect("failed to get stdout");
-        let messages = ReadManifestMessage::parse_stream(BufReader::new(stdout));
+        let messages = ReadManifestOut::parse_stream(BufReader::new(stdout));
 
         let manifests = messages.map(|message| match message.expect("failed to parse message") {
-            ReadManifestMessage::Manifest { manifest, .. } => manifest,
+            ReadManifestOut::Manifest { manifest, .. } => manifest,
         });
 
         child.wait().expect("failed to wait for read-manifest");

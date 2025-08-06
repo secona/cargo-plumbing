@@ -18,6 +18,7 @@ pub mod lock_dependencies;
 pub mod lockfile;
 pub mod read_lockfile;
 pub mod read_manifest;
+pub mod write_lockfile;
 
 /// Iterator over deserialized jsonline messages
 ///

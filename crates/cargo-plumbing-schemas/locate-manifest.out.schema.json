@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "LocateManifestMessage",
-  "description": "Represents the messages outputted by the `cargo-plumbing locate-manifest` command.\n\n This enum captures all possible JSON objects that the command can emit. The `reason`\n field acts as a discriminant to distinguish between different message types.",
+  "title": "LocateManifestOut",
+  "description": "Output messages for `cargo-plumbing locate-manifest`.",
   "oneOf": [
     {
       "description": "A message containing the location of a found `Cargo.toml` manifest.",

@@ -5,7 +5,7 @@ use cargo::core::{
 };
 use cargo::util::toml::read_manifest;
 use cargo::{CargoResult, GlobalContext};
-use cargo_plumbing_schemas::read_manifest::ReadManifestMessage;
+use cargo_plumbing_schemas::read_manifest::ReadManifestOut;
 use cargo_util::paths;
 
 #[derive(Debug, clap::Args)]
@@ -26,12 +26,12 @@ pub(crate) fn exec(gctx: &mut GlobalContext, args: Args) -> CargoResult<()> {
 
         // Here, we print the root Package or the Virtual Manifest of the workspace.
         let msg = match workspace.root_maybe() {
-            MaybePackage::Package(pkg) => ReadManifestMessage::Manifest {
+            MaybePackage::Package(pkg) => ReadManifestOut::Manifest {
                 path: gctx.cwd().join(pkg.manifest_path()),
                 pkg_id: Some(pkg.package_id().to_spec()),
                 manifest: pkg.manifest().normalized_toml().clone(),
             },
-            MaybePackage::Virtual(v) => ReadManifestMessage::Manifest {
+            MaybePackage::Virtual(v) => ReadManifestOut::Manifest {
                 path: gctx.cwd().join(workspace.root_manifest()),
                 pkg_id: None,
                 manifest: v.normalized_toml().clone(),
@@ -46,7 +46,7 @@ pub(crate) fn exec(gctx: &mut GlobalContext, args: Args) -> CargoResult<()> {
             .members()
             .filter(|p| p.manifest_path() != workspace.root_manifest())
         {
-            let msg = ReadManifestMessage::Manifest {
+            let msg = ReadManifestOut::Manifest {
                 path: gctx.cwd().join(member.manifest_path()),
                 pkg_id: Some(member.package_id().to_spec()),
                 manifest: member.manifest().normalized_toml().clone(),
@@ -69,7 +69,7 @@ pub(crate) fn exec(gctx: &mut GlobalContext, args: Args) -> CargoResult<()> {
             ),
         };
 
-        let msg = ReadManifestMessage::Manifest {
+        let msg = ReadManifestOut::Manifest {
             path: manifest_path.clone(),
             pkg_id,
             manifest,
@@ -116,7 +116,7 @@ fn print_workspace_root(
         EitherManifest::Virtual(v) => (None, v.normalized_toml().clone()),
     };
 
-    let msg = ReadManifestMessage::Manifest {
+    let msg = ReadManifestOut::Manifest {
         path: manifest_path.clone(),
         pkg_id,
         manifest,
