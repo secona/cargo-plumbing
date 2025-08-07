@@ -1,4 +1,5 @@
 use cargo_test_support::basic_manifest;
+use cargo_test_support::compare::assert_e2e;
 use cargo_test_support::git;
 use cargo_test_support::prelude::*;
 use cargo_test_support::project;
@@ -574,4 +575,213 @@ fn workspace_package_depend_on_workspace_member() {
             .against_jsonlines(),
         )
         .run();
+}
+
+#[cargo_test]
+fn lock_dependencies_conservatively_using_previous_lock() {
+    Package::new("a", "1.0.0").publish();
+
+    let p = project()
+        .file("src/lib.rs", "")
+        .file(
+            "Cargo.toml",
+            r#"
+                [package]
+                name = "lock-dependencies-test"
+                version = "0.1.0"
+                authors = []
+                edition = "2024"
+
+                [dependencies]
+                a = "1.0.0"
+            "#,
+        )
+        .build();
+    let manifest_path = p.root().join("Cargo.toml");
+    let lockfile_path = p.root().join("Cargo.lock");
+
+    p.cargo_global("check").run();
+
+    let out = p
+        .cargo_plumbing("plumbing read-lockfile")
+        .arg("--lockfile-path")
+        .arg(&lockfile_path)
+        .run();
+    let previous_lock = String::from_utf8(out.stdout).unwrap();
+
+    assert_e2e().eq(
+        &previous_lock,
+        str![[r#"
+[
+  {
+    "reason": "lockfile",
+    "version": 4
+  },
+  {
+    "checksum": "3a351dafbc8a3a9cba7c06dfe8caa11a3a45f800a336bb5b913a8f1e2652d454",
+    "id": "registry+https://github.com/rust-lang/crates.io-index#a@1.0.0",
+    "reason": "locked-package"
+  },
+  {
+    "dependencies": [
+      "a"
+    ],
+    "id": "lock-dependencies-test@0.1.0",
+    "reason": "locked-package"
+  }
+]
+"#]]
+        .is_json()
+        .against_jsonlines(),
+    );
+
+    Package::new("a", "1.0.1").publish();
+
+    let out = p
+        .cargo_plumbing("plumbing lock-dependencies")
+        .arg("--manifest-path")
+        .arg(&manifest_path)
+        .with_stdin(previous_lock)
+        .run();
+    let latest_lock = String::from_utf8(out.stdout).unwrap();
+
+    assert_e2e().eq(
+        latest_lock,
+        str![[r#"
+[
+  {
+    "reason": "lockfile",
+    "version": 4
+  },
+  {
+    "checksum": "b4e7ca49a1828dc529a7857517b75c0f2db074db0b546d8626043db8618c097b",
+    "id": "registry+https://github.com/rust-lang/crates.io-index#a@1.0.1",
+    "reason": "locked-package"
+  },
+  {
+    "dependencies": [
+      "a"
+    ],
+    "id": "lock-dependencies-test@0.1.0",
+    "reason": "locked-package"
+  }
+]
+"#]]
+        .is_json()
+        .against_jsonlines(),
+    );
+}
+
+#[cargo_test]
+fn lock_dependencies_conservatively_using_previous_lock_with_old_lockfile_version() {
+    let cksum = Package::new("a", "1.0.0").publish();
+
+    let p = project()
+        .file("src/lib.rs", "")
+        .file(
+            "Cargo.toml",
+            r#"
+                [package]
+                name = "lock-dependencies-test"
+                version = "0.1.0"
+                authors = []
+                edition = "2024"
+
+                [dependencies]
+                a = "1.0.0"
+            "#,
+        )
+        .file(
+            "Cargo.lock",
+            &format!(
+                r#"
+                    [root]
+                    name = "lock-dependencies-test"
+                    version = "0.1.0"
+                    dependencies = [
+                     "a 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
+                    ]
+
+                    [[package]]
+                    name = "a"
+                    version = "1.0.0"
+                    source = "registry+https://github.com/rust-lang/crates.io-index"
+
+                    [metadata]
+                    "checksum a 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)" = "{cksum}"
+                "#,
+            ),
+        )
+        .build();
+    let manifest_path = p.root().join("Cargo.toml");
+    let lockfile_path = p.root().join("Cargo.lock");
+
+    let out = p
+        .cargo_plumbing("plumbing read-lockfile")
+        .arg("--lockfile-path")
+        .arg(&lockfile_path)
+        .run();
+    let previous_lock = String::from_utf8(out.stdout).unwrap();
+
+    assert_e2e().eq(
+        &previous_lock,
+        str![[r#"
+[
+  {
+    "reason": "lockfile",
+    "version": null
+  },
+  {
+    "reason": "locked-package",
+    "id": "registry+https://github.com/rust-lang/crates.io-index#a@1.0.0",
+    "checksum": "3a351dafbc8a3a9cba7c06dfe8caa11a3a45f800a336bb5b913a8f1e2652d454"
+  },
+  {
+    "reason": "locked-package",
+    "id": "lock-dependencies-test@0.1.0",
+    "dependencies": [
+      "registry+https://github.com/rust-lang/crates.io-index#a@1.0.0"
+    ]
+  }
+]
+"#]]
+        .is_json()
+        .against_jsonlines(),
+    );
+
+    Package::new("a", "1.0.1").publish();
+
+    let out = p
+        .cargo_plumbing("plumbing lock-dependencies")
+        .arg("--manifest-path")
+        .arg(&manifest_path)
+        .with_stdin(previous_lock)
+        .run();
+    let latest_lock = String::from_utf8(out.stdout).unwrap();
+
+    assert_e2e().eq(
+        latest_lock,
+        str![[r#"
+[
+  {
+    "reason": "lockfile",
+    "version": 4
+  },
+  {
+    "checksum": "b4e7ca49a1828dc529a7857517b75c0f2db074db0b546d8626043db8618c097b",
+    "id": "registry+https://github.com/rust-lang/crates.io-index#a@1.0.1",
+    "reason": "locked-package"
+  },
+  {
+    "dependencies": [
+      "a"
+    ],
+    "id": "lock-dependencies-test@0.1.0",
+    "reason": "locked-package"
+  }
+]
+"#]]
+        .is_json()
+        .against_jsonlines(),
+    );
 }
