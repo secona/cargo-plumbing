@@ -1,4 +1,5 @@
-use std::io::BufReader;
+use std::env::current_dir;
+use std::io::{BufReader, Read};
 use std::path::PathBuf;
 use std::process::{Command, Stdio};
 
@@ -11,6 +12,8 @@ use clap::Parser;
 struct Args {
     #[arg(long)]
     manifest_path: Option<PathBuf>,
+    #[arg(long)]
+    lockfile_path: Option<PathBuf>,
     #[arg(long, default_value_t = false)]
     workspace: bool,
 }
@@ -66,6 +69,41 @@ fn run(args: &Args) -> CargoResult<()> {
 
         child.wait().expect("failed to wait for read-manifest");
         manifests.collect()
+    };
+    
+    let _lockfile = {
+        let lockfile_path = args.lockfile_path.clone().unwrap_or(current_dir()?.join("Cargo.lock"));
+
+        if lockfile_path.is_file() {
+            let mut cmd = Command::new("cargo");
+            cmd.args(["run", "plumbing", "read-lockfile"])
+                .arg("--lockfile-path")
+                .arg(lockfile_path)
+                .stdout(Stdio::piped());
+
+            let mut child = cmd.spawn().expect("failed to run read-manifest");
+            let mut stdout = child.stdout.take().expect("failed to get stdout");
+
+            let mut buffer = Vec::new();
+            stdout.read_to_end(&mut buffer).expect("failed to read stdout");
+
+            child.wait().expect("failed to wait for read-manifest");
+            Some(buffer)
+        } else {
+            None
+        }
+    };
+
+    let _locked_deps = {
+        let mut cmd = Command::new("cargo");
+        cmd.args(["run", "plumbing", "lock-dependencies"])
+            .arg("--manifest-path")
+            .arg(&manifest_path)
+            .stdout(Stdio::inherit());
+
+        let mut child = cmd.spawn().expect("failed to run read-manifest");
+
+        child.wait().expect("failed to wait for lock-dependencies");
     };
 
     anyhow::bail!("check for {manifest_path} is not implemented!");
