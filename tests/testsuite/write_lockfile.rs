@@ -32,8 +32,7 @@ fn package_with_deps() {
         .cargo_plumbing("plumbing lock-dependencies")
         .arg("--manifest-path")
         .arg(p.root().join("Cargo.toml"))
-        .exec_with_output()
-        .unwrap();
+        .run();
     let stdout = String::from_utf8(out.stdout).unwrap();
 
     p.cargo_plumbing("plumbing write-lockfile")
@@ -103,8 +102,7 @@ fn package_with_transitive_deps() {
         .cargo_plumbing("plumbing lock-dependencies")
         .arg("--manifest-path")
         .arg(p.root().join("Cargo.toml"))
-        .exec_with_output()
-        .unwrap();
+        .run();
     let stdout = String::from_utf8(out.stdout).unwrap();
 
     p.cargo_plumbing("plumbing write-lockfile")
@@ -184,8 +182,7 @@ fn package_with_path_deps() {
         .cargo_plumbing("plumbing lock-dependencies")
         .arg("--manifest-path")
         .arg(p.root().join("Cargo.toml"))
-        .exec_with_output()
-        .unwrap();
+        .run();
     let stdout = String::from_utf8(out.stdout).unwrap();
 
     p.cargo_plumbing("plumbing write-lockfile")
@@ -285,8 +282,7 @@ fn package_with_varying_deps_sources() {
         .cargo_plumbing("plumbing lock-dependencies")
         .arg("--manifest-path")
         .arg(p.root().join("Cargo.toml"))
-        .exec_with_output()
-        .unwrap();
+        .run();
     let stdout = String::from_utf8(out.stdout).unwrap();
 
     p.cargo_plumbing("plumbing write-lockfile")
@@ -398,8 +394,7 @@ fn package_with_unused_patches() {
         .cargo_plumbing("plumbing lock-dependencies")
         .arg("--manifest-path")
         .arg(p.root().join("Cargo.toml"))
-        .exec_with_output()
-        .unwrap();
+        .run();
     let stdout = String::from_utf8(out.stdout).unwrap();
 
     p.cargo_plumbing("plumbing write-lockfile")
@@ -478,8 +473,7 @@ fn workspace_member_with_inherited_deps() {
         .cargo_plumbing("plumbing lock-dependencies")
         .arg("--manifest-path")
         .arg(p.root().join("Cargo.toml"))
-        .exec_with_output()
-        .unwrap();
+        .run();
     let stdout = String::from_utf8(out.stdout).unwrap();
 
     p.cargo_plumbing("plumbing write-lockfile")
@@ -563,8 +557,7 @@ fn workspace_package_depend_on_workspace_member() {
         .cargo_plumbing("plumbing lock-dependencies")
         .arg("--manifest-path")
         .arg(p.root().join("Cargo.toml"))
-        .exec_with_output()
-        .unwrap();
+        .run();
     let stdout = String::from_utf8(out.stdout).unwrap();
 
     p.cargo_plumbing("plumbing write-lockfile")
@@ -625,8 +618,7 @@ fn invalid_lockfile_name() {
         .cargo_plumbing("plumbing lock-dependencies")
         .arg("--manifest-path")
         .arg(p.root().join("Cargo.toml"))
-        .exec_with_output()
-        .unwrap();
+        .run();
     let stdout = String::from_utf8(out.stdout).unwrap();
 
     p.cargo_plumbing("plumbing write-lockfile")
