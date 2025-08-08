@@ -66,21 +66,6 @@
     {
       "type": "object",
       "properties": {
-        "reason": {
-          "type": "string",
-          "const": "metadata"
-        }
-      },
-      "additionalProperties": {
-        "type": "string"
-      },
-      "required": [
-        "reason"
-      ]
-    },
-    {
-      "type": "object",
-      "properties": {
         "unused": {
           "type": "array",
           "items": {

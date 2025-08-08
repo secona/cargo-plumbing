@@ -45,10 +45,6 @@ pub(crate) fn exec(gctx: &GlobalContext, args: Args) -> CargoResult<()> {
         gctx.shell()
             .print_json(&ReadLockfileOut::UnusedPatches { unused: n.patch })?;
     }
-    if let Some(metadata) = n.metadata {
-        gctx.shell()
-            .print_json(&ReadLockfileOut::Metadata { metadata })?;
-    }
 
     Ok(())
 }
