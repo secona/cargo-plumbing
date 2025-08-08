@@ -5,7 +5,7 @@ use std::marker::PhantomData;
 
 use serde::{Deserialize, Serialize};
 
-use crate::lockfile::{Metadata, NormalizedDependency, NormalizedPatch};
+use crate::lockfile::{NormalizedDependency, NormalizedMetadata, NormalizedPatch};
 use crate::MessageIter;
 
 /// Output messages for `cargo-plumbing read-lockfile`.
@@ -23,7 +23,7 @@ pub enum ReadLockfileOut {
     },
     Metadata {
         #[serde(flatten)]
-        metadata: Metadata,
+        metadata: NormalizedMetadata,
     },
     UnusedPatches {
         unused: NormalizedPatch,

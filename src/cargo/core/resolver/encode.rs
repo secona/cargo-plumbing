@@ -6,13 +6,15 @@ use std::collections::{BTreeMap, HashMap};
 use std::fmt;
 use std::str::FromStr;
 
+use anyhow::Context;
+use cargo::util::internal;
 use cargo::util::interning::InternedString;
 use cargo::{
     core::{GitReference, PackageId, PackageIdSpec, Resolve, ResolveVersion, SourceId, SourceKind},
     CargoResult,
 };
 use cargo_plumbing_schemas::lockfile::{
-    NormalizedDependency, NormalizedPatch, NormalizedResolve, Precise,
+    NormalizedDependency, NormalizedMetadata, NormalizedPatch, NormalizedResolve, Precise,
 };
 use serde::{de, ser, Deserialize, Serialize};
 use url::Url;
@@ -49,15 +51,36 @@ impl EncodableResolve {
             package.push(root.normalize()?);
         }
 
+        let metadata = match self.metadata {
+            Some(m) => Some(normalize_metadata(m)?),
+            None => None,
+        };
+
         Ok(NormalizedResolve {
             package,
-            metadata: self.metadata,
+            metadata,
             patch: self.patch.normalize()?,
         })
     }
 }
 
 pub type Metadata = BTreeMap<String, String>;
+
+pub fn normalize_metadata(metadata: Metadata) -> CargoResult<NormalizedMetadata> {
+    let mut normalized_metadata = BTreeMap::new();
+
+    let prefix = "checksum ";
+    for (k, v) in metadata {
+        let k = k.strip_prefix(prefix).unwrap();
+        let enc_id = k
+            .parse::<EncodablePackageId>()
+            .with_context(|| internal("invalid encoding of checksum in lockfile"))?
+            .normalize()?;
+        normalized_metadata.insert(enc_id, v);
+    }
+
+    Ok(normalized_metadata)
+}
 
 impl Patch {
     pub(crate) fn normalize(self) -> CargoResult<NormalizedPatch> {

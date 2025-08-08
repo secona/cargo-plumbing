@@ -12,7 +12,7 @@ use std::{collections::BTreeMap, fmt};
 use cargo_util_schemas::core::PackageIdSpec;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
-pub type Metadata = BTreeMap<String, String>;
+pub type NormalizedMetadata = BTreeMap<PackageIdSpec, String>;
 
 #[derive(Deserialize, Serialize, Debug)]
 #[serde(rename_all = "snake_case")]
@@ -21,7 +21,7 @@ pub struct NormalizedResolve {
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub package: Vec<NormalizedDependency>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub metadata: Option<Metadata>,
+    pub metadata: Option<NormalizedMetadata>,
     #[serde(default, skip_serializing_if = "NormalizedPatch::is_empty")]
     pub patch: NormalizedPatch,
 }
