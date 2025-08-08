@@ -4,7 +4,7 @@ use std::{io::Read, marker::PhantomData};
 
 use serde::{Deserialize, Serialize};
 
-use crate::lockfile::{Metadata, NormalizedDependency, NormalizedPatch};
+use crate::lockfile::{NormalizedDependency, NormalizedMetadata, NormalizedPatch};
 use crate::MessageIter;
 
 /// Input messages for `cargo-plumbing write-lockfile`.
@@ -22,7 +22,7 @@ pub enum WriteLockfileIn {
     },
     Metadata {
         #[serde(flatten)]
-        metadata: Metadata,
+        metadata: NormalizedMetadata,
     },
     UnusedPatches {
         unused: NormalizedPatch,

@@ -9,8 +9,8 @@ use cargo::ops::resolve_with_previous;
 use cargo::sources::SourceConfigMap;
 use cargo::{CargoResult, GlobalContext};
 use cargo_plumbing::cargo::core::resolver::encode::{
-    encodable_package_id, encodable_resolve_node, encodable_source_id, EncodableDependency,
-    EncodeState,
+    encodable_package_id, encodable_resolve_node, encodable_source_id, normalize_metadata,
+    EncodableDependency, EncodeState,
 };
 use cargo_plumbing_schemas::lock_dependencies::LockDependenciesOut;
 use cargo_plumbing_schemas::lockfile::NormalizedPatch;
@@ -83,6 +83,7 @@ pub(crate) fn exec(gctx: &GlobalContext, args: Args) -> CargoResult<()> {
     }
 
     if !metadata.is_empty() {
+        let metadata = normalize_metadata(metadata)?;
         let msg = LockDependenciesOut::Metadata { metadata };
         gctx.shell().print_json(&msg)?;
     }

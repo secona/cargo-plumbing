@@ -617,7 +617,7 @@ fn old_lockfile() {
   },
   {
     "reason": "metadata",
-    "checksum a 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)": "3436ae58a84bb2033accec0cb50c6611f312249899579714793e0d0509470cd9"
+    "registry+https://github.com/rust-lang/crates.io-index#a@0.1.0": "3436ae58a84bb2033accec0cb50c6611f312249899579714793e0d0509470cd9"
   }
 ]
 "#]]
