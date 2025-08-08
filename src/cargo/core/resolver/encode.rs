@@ -14,7 +14,7 @@ use cargo::{
     CargoResult,
 };
 use cargo_plumbing_schemas::lockfile::{
-    NormalizedDependency, NormalizedMetadata, NormalizedPatch, NormalizedResolve, Precise,
+    NormalizedDependency, NormalizedPatch, NormalizedResolve, Precise,
 };
 use serde::{de, ser, Deserialize, Serialize};
 use url::Url;
@@ -38,49 +38,61 @@ struct Patch {
 
 impl EncodableResolve {
     pub fn normalize(self) -> CargoResult<NormalizedResolve> {
-        let mut package = if let Some(package) = self.package {
-            package
-                .into_iter()
-                .map(|p| p.normalize())
-                .collect::<Result<Vec<_>, _>>()?
-        } else {
-            Vec::new()
-        };
-
-        if let Some(root) = self.root {
-            package.push(root.normalize()?);
-        }
-
-        let metadata = match self.metadata {
-            Some(m) => Some(normalize_metadata(m)?),
-            None => None,
-        };
+        let package = normalize_packages(self.root, self.package, self.metadata)?;
 
         Ok(NormalizedResolve {
             package,
-            metadata,
             patch: self.patch.normalize()?,
         })
     }
 }
 
-pub type Metadata = BTreeMap<String, String>;
+pub fn normalize_packages(
+    root: Option<EncodableDependency>,
+    packages: Option<Vec<EncodableDependency>>,
+    metadata: Option<Metadata>,
+) -> CargoResult<Vec<NormalizedDependency>> {
+    let mut metadata_map = {
+        let mut metadata_map = HashMap::new();
+        if let Some(metadata) = metadata {
+            let prefix = "checksum ";
+            for (k, v) in metadata {
+                let k = k.strip_prefix(prefix).unwrap();
+                let id = k
+                    .parse::<EncodablePackageId>()
+                    .with_context(|| internal("invalid encoding of checksum in lockfile"))?
+                    .normalize()?;
+                metadata_map.insert(id, v);
+            }
+        }
+        metadata_map
+    };
 
-pub fn normalize_metadata(metadata: Metadata) -> CargoResult<NormalizedMetadata> {
-    let mut normalized_metadata = BTreeMap::new();
+    let package = {
+        let mut normalized_packages = Vec::new();
+        if let Some(pkgs) = packages {
+            for pkg in pkgs {
+                let mut pkg = pkg.normalize()?;
+                if pkg.checksum.is_none() {
+                    pkg.checksum = metadata_map.remove(&pkg.id);
+                }
+                normalized_packages.push(pkg);
+            }
+        }
+        if let Some(pkg) = root {
+            let mut pkg = pkg.normalize()?;
+            if pkg.checksum.is_none() {
+                pkg.checksum = metadata_map.remove(&pkg.id);
+            }
+            normalized_packages.push(pkg);
+        }
+        normalized_packages
+    };
 
-    let prefix = "checksum ";
-    for (k, v) in metadata {
-        let k = k.strip_prefix(prefix).unwrap();
-        let enc_id = k
-            .parse::<EncodablePackageId>()
-            .with_context(|| internal("invalid encoding of checksum in lockfile"))?
-            .normalize()?;
-        normalized_metadata.insert(enc_id, v);
-    }
-
-    Ok(normalized_metadata)
+    Ok(package)
 }
+
+pub type Metadata = BTreeMap<String, String>;
 
 impl Patch {
     pub(crate) fn normalize(self) -> CargoResult<NormalizedPatch> {

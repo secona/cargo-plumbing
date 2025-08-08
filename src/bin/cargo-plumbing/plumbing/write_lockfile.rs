@@ -40,7 +40,6 @@ pub(crate) fn exec(gctx: &mut GlobalContext, args: Args) -> CargoResult<()> {
             WriteLockfileIn::Lockfile { version } => lock_version = version,
             WriteLockfileIn::LockedPackage { package } => locked_packages.push(package),
             WriteLockfileIn::UnusedPatches { unused } => unused_patches = Some(unused),
-            _ => {}
         }
     }
 
