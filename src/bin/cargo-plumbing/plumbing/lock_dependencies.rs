@@ -1,6 +1,7 @@
-use std::env;
 use std::fmt::Debug;
+use std::io::{BufReader, IsTerminal};
 use std::path::PathBuf;
+use std::{env, io};
 
 use cargo::core::registry::PackageRegistry;
 use cargo::core::resolver::{CliFeatures, HasDevUnits};
@@ -12,7 +13,8 @@ use cargo_plumbing::cargo::core::resolver::encode::{
     encodable_resolve_node, encodable_source_id, normalize_packages, EncodableDependency,
     EncodeState,
 };
-use cargo_plumbing_schemas::lock_dependencies::LockDependenciesOut;
+use cargo_plumbing::ops::resolve::into_resolve;
+use cargo_plumbing_schemas::lock_dependencies::{LockDependenciesIn, LockDependenciesOut};
 use cargo_plumbing_schemas::lockfile::NormalizedPatch;
 
 #[derive(Debug, clap::Args)]
@@ -28,8 +30,36 @@ pub(crate) fn exec(gctx: &GlobalContext, args: Args) -> CargoResult<()> {
         .unwrap_or(env::current_dir()?.join("Cargo.toml"));
     let path = gctx.cwd().join(manifest_path);
     let ws = Workspace::new(&path, gctx)?;
-    let previous_resolve = None;
 
+    let stdin = io::stdin();
+    if stdin.is_terminal() {
+        anyhow::bail!("input must be piped from a file or another command");
+    }
+
+    let messages = LockDependenciesIn::parse_stream(BufReader::new(stdin));
+
+    let mut lockfile_version: Option<u32> = None;
+    let mut locked_packages = Vec::new();
+    let mut unused_patches = None;
+
+    for message in messages {
+        match message? {
+            LockDependenciesIn::Lockfile { version } => lockfile_version = version,
+            LockDependenciesIn::LockedPackage { package } => locked_packages.push(package),
+            LockDependenciesIn::UnusedPatches { unused } => unused_patches = Some(unused),
+        }
+    }
+
+    let previous_resolve = if !locked_packages.is_empty() {
+        Some(into_resolve(
+            &ws,
+            lockfile_version,
+            locked_packages,
+            unused_patches.unwrap_or_default(),
+        )?)
+    } else {
+        None
+    };
     let source_config = SourceConfigMap::new(gctx)?;
     let mut registry = PackageRegistry::new_with_source_config(gctx, source_config)?;
 
@@ -38,7 +68,7 @@ pub(crate) fn exec(gctx: &GlobalContext, args: Args) -> CargoResult<()> {
         &ws,
         &CliFeatures::new_all(true),
         HasDevUnits::Yes,
-        previous_resolve,
+        previous_resolve.as_ref(),
         None,
         &[],
         true,
