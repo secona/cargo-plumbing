@@ -578,7 +578,7 @@ fn old_lockfile() {
                     name = "foo"
                     version = "0.0.1"
                     dependencies = [
-                     "bar 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+                     "a 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
                     ]
 
                     [[package]]
@@ -613,7 +613,7 @@ fn old_lockfile() {
     "reason": "locked-package",
     "id": "foo@0.0.1",
     "dependencies": [
-      "registry+https://github.com/rust-lang/crates.io-index#bar@0.1.0"
+      "registry+https://github.com/rust-lang/crates.io-index#a@0.1.0"
     ]
   }
 ]
