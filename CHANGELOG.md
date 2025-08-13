@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
 
+### Features
+
+Commands
+- `locate-manifest`
+- `read-manifest`
+- `read-lockfile`
+- `write-lockfile`
+- `lock-dependencies`
+
 ## [0.0.2] - 2025-02-28
 
 <!-- next-url -->
