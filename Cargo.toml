@@ -119,7 +119,7 @@ lto = true
 
 [package]
 name = "cargo-plumbing"
-version = "0.0.2"
+version = "0.0.3"
 description = "Proposed plumbing commands for cargo"
 categories = []
 keywords = []
