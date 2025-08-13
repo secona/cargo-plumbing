@@ -104,6 +104,61 @@ fn finds_virtual_manifest() {
 }
 
 #[cargo_test]
+fn finds_member_manifest() {
+    let p = project()
+        .file(
+            "Cargo.toml",
+            r#"
+                [workspace]
+                resolver = "3"
+                members = ["crate1", "crate2"]
+            "#,
+        )
+        .file("crate1/src/lib.rs", "")
+        .file(
+            "crate1/Cargo.toml",
+            r#"
+                [package]
+                name = "crate1"
+                version = "0.1.0"
+                edition = "2024"
+            "#,
+        )
+        .file("crate2/src/lib.rs", "")
+        .file(
+            "crate2/Cargo.toml",
+            r#"
+                [package]
+                name = "crate2"
+                version = "0.1.0"
+                edition = "2024"
+            "#,
+        )
+        .build();
+
+    let manifest_path = p.root().join("crate1/Cargo.toml");
+
+    p.cargo_plumbing("plumbing locate-manifest")
+        .arg("--manifest-path")
+        .arg(&manifest_path)
+        .with_stdout_data(
+            str![[r#"
+[
+  {
+    "manifest_path": "[ROOT]/foo/crate1/Cargo.toml",
+    "reason": "manifest-location"
+  }
+]
+"#]]
+            .is_json()
+            .against_jsonlines(),
+        )
+        .with_stderr_data("")
+        .with_status(0)
+        .run();
+}
+
+#[cargo_test]
 fn errors_when_no_manifest() {
     let p = project().no_manifest().build();
 
