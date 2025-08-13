@@ -16,6 +16,11 @@ pub enum WriteLockfileIn {
     Lockfile {
         version: Option<u32>,
     },
+    /// The locked package from the lockfile
+    ///
+    /// Expected to be inputted in a lexicographical order based on the package
+    /// name, matching the order of the `[[package]]` entries in a `Cargo.lock`
+    /// file.
     LockedPackage {
         #[serde(flatten)]
         package: NormalizedDependency,
