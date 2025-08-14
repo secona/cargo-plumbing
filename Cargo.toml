@@ -18,24 +18,24 @@ include = [
 ]
 
 [workspace.dependencies]
-anyhow = "1.0.96"
-automod = "1.0.14"
-camino = "1.1.10"
+anyhow = "1.0.99"
+automod = "1.0.15"
+camino = "1.1.11"
 cargo = "0.89.0"
 cargo-test-macro = "0.4.3"
 cargo-test-support = "0.7.4"
 cargo-plumbing-schemas = { version = "0.0.1", path = "crates/cargo-plumbing-schemas" }
 cargo-util = "0.2.21"
 cargo-util-schemas = "0.8.2"
-clap = "4.5.31"
-clap-cargo = "0.15.2"
+clap = "4.5.45"
+clap-cargo = "0.16.0"
 schemars = "1.0.0-alpha.17"
 semver = "1.0.26"
-serde = "1.0.217"
-serde_json = "1.0.138"
-serde-untagged = "0.1.6"
+serde = "1.0.219"
+serde_json = "1.0.142"
+serde-untagged = "0.1.8"
 snapbox = { version = "0.6.21", features = ["cmd", "path"] }
-toml = "0.9.2"
+toml = "0.9.5"
 url = "2.5.4"
 
 [workspace.lints.rust]
