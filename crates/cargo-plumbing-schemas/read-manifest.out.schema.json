@@ -1021,6 +1021,8 @@
         "priority": {
           "type": "integer",
           "format": "int8",
+          "minimum": -128,
+          "maximum": 127,
           "default": 0
         }
       },
@@ -1416,6 +1418,14 @@
             {
               "type": "null"
             }
+          ],
+          "default": null
+        },
+        "hint-mostly-unused": {
+          "description": "Unstable feature `hint-mostly-unused`",
+          "type": [
+            "boolean",
+            "null"
           ],
           "default": null
         }
