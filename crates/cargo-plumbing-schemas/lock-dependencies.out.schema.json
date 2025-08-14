@@ -24,7 +24,7 @@
       ]
     },
     {
-      "description": "The locked package from the lockfile\n\n Expected to be outputted in a lexicographical order based on the package\n name, matching the order of the `[[package]]` entries in a `Cargo.lock`\n file.",
+      "description": "The locked package from the lockfile\n\nExpected to be outputted in a lexicographical order based on the package\nname, matching the order of the `[[package]]` entries in a `Cargo.lock`\nfile.",
       "type": "object",
       "properties": {
         "id": {

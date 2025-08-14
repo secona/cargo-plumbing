@@ -67,6 +67,7 @@ fn package_with_deps() {
       "dev_dependencies": null,
       "example": [],
       "features": null,
+      "hints": null,
       "lib": null,
       "lints": null,
       "package": {
@@ -163,6 +164,7 @@ fn package_with_deps() {
       "dev_dependencies": null,
       "example": [],
       "features": null,
+      "hints": null,
       "lib": null,
       "lints": null,
       "package": {
@@ -307,6 +309,7 @@ fn workspace_package_with_inherited_deps() {
       "dev_dependencies": null,
       "example": [],
       "features": null,
+      "hints": null,
       "lib": null,
       "lints": null,
       "package": {
@@ -433,6 +436,7 @@ fn workspace_package_with_inherited_deps() {
       "dev_dependencies": null,
       "example": [],
       "features": null,
+      "hints": null,
       "lib": null,
       "lints": null,
       "package": {
@@ -580,6 +584,7 @@ fn workspace_package_with_members() {
       "dev_dependencies": null,
       "example": [],
       "features": null,
+      "hints": null,
       "lib": null,
       "lints": null,
       "package": {
@@ -686,6 +691,7 @@ fn workspace_package_with_members() {
       "dev_dependencies": null,
       "example": [],
       "features": null,
+      "hints": null,
       "lib": null,
       "lints": null,
       "package": {
@@ -759,6 +765,7 @@ fn workspace_package_with_members() {
       "dev_dependencies": null,
       "example": [],
       "features": null,
+      "hints": null,
       "lib": {
         "bench": null,
         "crate-type": null,
@@ -836,6 +843,7 @@ fn workspace_package_with_members() {
       "dev_dependencies": null,
       "example": [],
       "features": null,
+      "hints": null,
       "lib": {
         "bench": null,
         "crate-type": null,
@@ -964,6 +972,7 @@ fn virtual_workspace_with_members() {
       "dev_dependencies": null,
       "example": null,
       "features": null,
+      "hints": null,
       "lib": null,
       "lints": null,
       "package": null,
@@ -1019,6 +1028,7 @@ fn virtual_workspace_with_members() {
       "dev_dependencies": null,
       "example": null,
       "features": null,
+      "hints": null,
       "lib": null,
       "lints": null,
       "package": null,
@@ -1059,6 +1069,7 @@ fn virtual_workspace_with_members() {
       "dev_dependencies": null,
       "example": [],
       "features": null,
+      "hints": null,
       "lib": {
         "bench": null,
         "crate-type": null,
@@ -1136,6 +1147,7 @@ fn virtual_workspace_with_members() {
       "dev_dependencies": null,
       "example": [],
       "features": null,
+      "hints": null,
       "lib": {
         "bench": null,
         "crate-type": null,
@@ -1301,6 +1313,7 @@ fn workspace_member_with_inherited_deps() {
       "dev_dependencies": null,
       "example": [],
       "features": null,
+      "hints": null,
       "lib": {
         "bench": null,
         "crate-type": null,
@@ -1399,6 +1412,7 @@ fn workspace_member_with_inherited_deps() {
       "dev_dependencies": null,
       "example": [],
       "features": null,
+      "hints": null,
       "lib": {
         "bench": null,
         "crate-type": null,
@@ -1509,6 +1523,7 @@ fn workspace_member_with_inherited_deps() {
       "dev_dependencies": null,
       "example": [],
       "features": null,
+      "hints": null,
       "lib": null,
       "lints": null,
       "package": {
@@ -1605,6 +1620,7 @@ fn workspace_member_with_inherited_deps() {
       "dev_dependencies": null,
       "example": [],
       "features": null,
+      "hints": null,
       "lib": {
         "bench": null,
         "crate-type": null,
@@ -1682,6 +1698,7 @@ fn workspace_member_with_inherited_deps() {
       "dev_dependencies": null,
       "example": [],
       "features": null,
+      "hints": null,
       "lib": {
         "bench": null,
         "crate-type": null,
@@ -1845,6 +1862,7 @@ fn workspace_member_via_package_workspace_key() {
       "dev_dependencies": null,
       "example": [],
       "features": null,
+      "hints": null,
       "lib": {
         "bench": null,
         "crate-type": null,
@@ -1943,6 +1961,7 @@ fn workspace_member_via_package_workspace_key() {
       "dev_dependencies": null,
       "example": [],
       "features": null,
+      "hints": null,
       "lib": {
         "bench": null,
         "crate-type": null,
@@ -2035,6 +2054,7 @@ fn workspace_member_via_package_workspace_key() {
       "dev_dependencies": null,
       "example": null,
       "features": null,
+      "hints": null,
       "lib": null,
       "lints": null,
       "package": null,
@@ -2098,6 +2118,7 @@ fn workspace_member_via_package_workspace_key() {
       "dev_dependencies": null,
       "example": [],
       "features": null,
+      "hints": null,
       "lib": {
         "bench": null,
         "crate-type": null,
@@ -2196,6 +2217,7 @@ fn workspace_member_via_package_workspace_key() {
       "dev_dependencies": null,
       "example": [],
       "features": null,
+      "hints": null,
       "lib": {
         "bench": null,
         "crate-type": null,
