@@ -21,12 +21,12 @@ include = [
 anyhow = "1.0.99"
 automod = "1.0.15"
 camino = "1.1.11"
-cargo = { git = "https://github.com/rust-lang/cargo", branch = "rust-1.90.0" }
-cargo-test-macro = { git = "https://github.com/rust-lang/cargo", branch = "rust-1.90.0" }
-cargo-test-support = { git = "https://github.com/rust-lang/cargo", branch = "rust-1.90.0" }
+cargo = { git = "https://github.com/rust-lang/cargo", branch = "master" }
+cargo-test-macro = { git = "https://github.com/rust-lang/cargo", branch = "master" }
+cargo-test-support = { git = "https://github.com/rust-lang/cargo", branch = "master" }
 cargo-plumbing-schemas = { version = "0.0.1", path = "crates/cargo-plumbing-schemas" }
-cargo-util = { git = "https://github.com/rust-lang/cargo", branch = "rust-1.90.0" }
-cargo-util-schemas = { git = "https://github.com/rust-lang/cargo", branch = "rust-1.90.0" }
+cargo-util = { git = "https://github.com/rust-lang/cargo", branch = "master" }
+cargo-util-schemas = { git = "https://github.com/rust-lang/cargo", branch = "master" }
 clap = "4.5.45"
 clap-cargo = "0.16.0"
 schemars = "1.0.4"
