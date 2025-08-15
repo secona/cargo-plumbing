@@ -6,6 +6,7 @@ use anyhow::Context as _;
 use cargo::util::Filesystem;
 use cargo::{CargoResult, GlobalContext};
 use cargo_plumbing::cargo::core::resolver::encode::EncodableResolve;
+use cargo_plumbing::ops::resolve::normalize_resolve;
 use cargo_plumbing_schemas::read_lockfile::ReadLockfileOut;
 
 #[derive(Debug, clap::Args)]
@@ -36,7 +37,7 @@ pub(crate) fn exec(gctx: &GlobalContext, args: Args) -> CargoResult<()> {
     gctx.shell()
         .print_json(&ReadLockfileOut::Lockfile { version: v.version })?;
 
-    let n = v.normalize()?;
+    let n = normalize_resolve(v)?;
     for package in n.package {
         gctx.shell()
             .print_json(&ReadLockfileOut::LockedPackage { package })?;

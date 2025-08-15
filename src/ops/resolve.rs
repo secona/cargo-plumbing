@@ -1,13 +1,16 @@
 use std::collections::{BTreeMap, HashMap, HashSet};
 
+use anyhow::Context as _;
 use cargo::core::{
     PackageId, PackageIdSpec, Resolve, ResolveVersion, SourceId, SourceKind, Workspace,
 };
 use cargo::util::Graph;
 use cargo::CargoResult;
-use cargo_plumbing_schemas::lockfile::{NormalizedDependency, NormalizedPatch};
+use cargo_plumbing_schemas::lockfile::{NormalizedDependency, NormalizedPatch, NormalizedResolve};
 
-use crate::cargo::core::resolver::encode::build_path_deps;
+use crate::cargo::core::resolver::encode::{
+    build_path_deps, EncodableDependency, EncodablePackageId, EncodableResolve, Metadata, Patch,
+};
 
 /// Converts plumbing messages into an incomplete [`Resolve`]
 ///
@@ -218,4 +221,151 @@ pub fn spec_to_id(
     }
 
     Ok(None)
+}
+
+/// Normalizes [`EncodableResolve`] into [`NormalizedResolve`].
+///
+/// This is used when outputting a message containing a resolve result, i.e. for `read-lockfile`
+/// plumbing command using [`ReadLockfileOut`].
+///
+/// [`ReadLockfileOut`]: cargo_plumbing_schemas::read_lockfile::ReadLockfileOut
+pub fn normalize_resolve(resolve: EncodableResolve) -> CargoResult<NormalizedResolve> {
+    let package = normalize_packages(resolve.root, resolve.package, resolve.metadata)?;
+
+    Ok(NormalizedResolve {
+        package,
+        patch: normalize_patch(resolve.patch)?,
+    })
+}
+
+/// Normalizes a set of packages and their checksums
+///
+/// Old lockfile versions have:
+/// - packages' checksums separated in a `[metadata]` table
+/// - the root package separated from the list of packages in `[root]`
+///
+/// This function normalizes these packages by moving the root package into the list of packages
+/// and move the checksums to be with their respective packages instead of separated in another
+/// table.
+pub fn normalize_packages(
+    root: Option<EncodableDependency>,
+    packages: Option<Vec<EncodableDependency>>,
+    metadata: Option<Metadata>,
+) -> CargoResult<Vec<NormalizedDependency>> {
+    // We first parse the checksums to be indexable by `PackageIdSpec`. The metadata table
+    // itself has keys prefixed with "checksum " then followed by an `EncodablePackageId`.
+    let mut metadata_map = {
+        let mut metadata_map = HashMap::new();
+        if let Some(metadata) = metadata {
+            let prefix = "checksum ";
+            for (k, v) in metadata {
+                let k = k.strip_prefix(prefix).unwrap();
+                let id = k
+                    .parse::<EncodablePackageId>()
+                    .with_context(|| "invalid encoding of checksum in lockfile")?;
+                let id = normalize_package_id(id)?;
+                metadata_map.insert(id, v);
+            }
+        }
+        metadata_map
+    };
+
+    let package = {
+        let mut normalized_packages = Vec::new();
+        if let Some(pkgs) = packages {
+            for pkg in pkgs {
+                let mut pkg = normalize_dependency(pkg)?;
+                // We check if the checksum exist already or not. If the checksum already exists,
+                // we are not dealing with an old lockfile and can safely continue.
+                if pkg.checksum.is_none() {
+                    // If the checksum does not exist, we take it from the parsed metadata table we
+                    // created earlier.
+                    pkg.checksum = metadata_map.remove(&pkg.id);
+                }
+                normalized_packages.push(pkg);
+            }
+        }
+        if let Some(pkg) = root {
+            let mut pkg = normalize_dependency(pkg)?;
+            if pkg.checksum.is_none() {
+                pkg.checksum = metadata_map.remove(&pkg.id);
+            }
+            normalized_packages.push(pkg);
+        }
+        normalized_packages
+    };
+
+    Ok(package)
+}
+
+/// Normalizes unused patch entries in the lockfile into a [`NormalizedPatch`].
+///
+/// The unused patches have the same format as the packages since they're serialized using
+/// [`EncodableDependency`].
+pub fn normalize_patch(patch: Patch) -> CargoResult<NormalizedPatch> {
+    let unused = patch
+        .unused
+        .into_iter()
+        .map(normalize_dependency)
+        .collect::<Result<Vec<_>, _>>()?;
+    Ok(NormalizedPatch { unused })
+}
+
+/// Normalizes [`EncodableDependency`] into a [`NormalizedDependency`].
+///
+/// This function normalizes a [`EncodableDependency`] as-is. It doesn't verify if the dependency
+/// is valid other than checking the package ID format.
+///
+/// To handle old lockfile versions where the package information is scattered throughout the
+/// lockfile, use [`normalize_packages`], which uses this function internally.
+pub fn normalize_dependency(dep: EncodableDependency) -> CargoResult<NormalizedDependency> {
+    let mut id = PackageIdSpec::new(dep.name).with_version(dep.version.parse()?);
+    let mut source = None;
+
+    if let Some(s) = dep.source {
+        id = id.with_url(s.url.clone()).with_kind(s.kind.clone());
+        source = Some(s);
+    }
+
+    let dependencies = match dep.dependencies {
+        Some(deps) => Some(
+            deps.into_iter()
+                .map(normalize_package_id)
+                .collect::<Result<Vec<_>, _>>()?,
+        ),
+        None => None,
+    };
+
+    let replace = match dep.replace {
+        Some(replace) => Some(normalize_package_id(replace)?),
+        None => None,
+    };
+
+    let rev = match source {
+        Some(s) if matches!(s.kind, SourceKind::Git(..)) => s.precise,
+        _ => None,
+    };
+
+    Ok(NormalizedDependency {
+        id,
+        rev,
+        checksum: dep.checksum,
+        dependencies,
+        replace,
+    })
+}
+
+/// Normalizes [`EncodablePackageId`] into a [`PackageIdSpec`].
+pub fn normalize_package_id(package_id: EncodablePackageId) -> CargoResult<PackageIdSpec> {
+    let mut id = PackageIdSpec::new(package_id.name);
+
+    if let Some(version) = package_id.version {
+        id = id.with_version(version.parse()?);
+    }
+
+    if let Some(source) = package_id.source {
+        id = id.with_url(source.url).with_kind(source.kind);
+    }
+
+    Ok(id)
 }
