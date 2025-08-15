@@ -10,10 +10,9 @@ use cargo::ops::resolve_with_previous;
 use cargo::sources::SourceConfigMap;
 use cargo::{CargoResult, GlobalContext};
 use cargo_plumbing::cargo::core::resolver::encode::{
-    encodable_resolve_node, encodable_source_id, normalize_packages, EncodableDependency,
-    EncodeState,
+    encodable_resolve_node, encodable_source_id, EncodableDependency, EncodeState,
 };
-use cargo_plumbing::ops::resolve::into_resolve;
+use cargo_plumbing::ops::resolve::{into_resolve, normalize_dependency, normalize_packages};
 use cargo_plumbing_schemas::lock_dependencies::{LockDependenciesIn, LockDependenciesOut};
 use cargo_plumbing_schemas::lockfile::NormalizedPatch;
 
@@ -101,7 +100,7 @@ pub(crate) fn exec(gctx: &GlobalContext, args: Args) -> CargoResult<()> {
         .unused_patches()
         .iter()
         .map(|id| {
-            EncodableDependency {
+            normalize_dependency(EncodableDependency {
                 name: id.name().to_string(),
                 version: id.version().to_string(),
                 source: encodable_source_id(id.source_id(), resolve.version()),
@@ -112,8 +111,7 @@ pub(crate) fn exec(gctx: &GlobalContext, args: Args) -> CargoResult<()> {
                 } else {
                     None
                 },
-            }
-            .normalize()
+            })
         })
         .collect::<Result<Vec<_>, _>>()?;
     if !unused.is_empty() {

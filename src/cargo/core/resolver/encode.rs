@@ -6,17 +6,13 @@ use std::collections::{BTreeMap, HashMap, HashSet};
 use std::fmt;
 use std::str::FromStr;
 
-use anyhow::Context;
-use cargo::core::{Dependency, Package, Workspace};
-use cargo::util::internal;
+use cargo::core::{
+    Dependency, GitReference, Package, PackageId, Resolve, ResolveVersion, SourceId, SourceKind,
+    Workspace,
+};
 use cargo::util::interning::InternedString;
-use cargo::{
-    core::{GitReference, PackageId, PackageIdSpec, Resolve, ResolveVersion, SourceId, SourceKind},
-    CargoResult,
-};
-use cargo_plumbing_schemas::lockfile::{
-    NormalizedDependency, NormalizedPatch, NormalizedResolve, Precise,
-};
+use cargo::CargoResult;
+use cargo_plumbing_schemas::lockfile::Precise;
 use serde::{de, ser, Deserialize, Serialize};
 use url::Url;
 
@@ -24,12 +20,12 @@ use url::Url;
 #[derive(Serialize, Deserialize, Debug)]
 pub struct EncodableResolve {
     pub version: Option<u32>,
-    package: Option<Vec<EncodableDependency>>,
+    pub package: Option<Vec<EncodableDependency>>,
     /// `root` is optional to allow backward compatibility.
-    root: Option<EncodableDependency>,
-    metadata: Option<Metadata>,
+    pub root: Option<EncodableDependency>,
+    pub metadata: Option<Metadata>,
     #[serde(default, skip_serializing_if = "Patch::is_empty")]
-    patch: Patch,
+    pub patch: Patch,
 }
 
 pub fn build_path_deps(
@@ -107,78 +103,13 @@ pub fn build_path_deps(
 }
 
 #[derive(Serialize, Deserialize, Debug, Default)]
-struct Patch {
-    unused: Vec<EncodableDependency>,
-}
-
-impl EncodableResolve {
-    pub fn normalize(self) -> CargoResult<NormalizedResolve> {
-        let package = normalize_packages(self.root, self.package, self.metadata)?;
-
-        Ok(NormalizedResolve {
-            package,
-            patch: self.patch.normalize()?,
-        })
-    }
-}
-
-pub fn normalize_packages(
-    root: Option<EncodableDependency>,
-    packages: Option<Vec<EncodableDependency>>,
-    metadata: Option<Metadata>,
-) -> CargoResult<Vec<NormalizedDependency>> {
-    let mut metadata_map = {
-        let mut metadata_map = HashMap::new();
-        if let Some(metadata) = metadata {
-            let prefix = "checksum ";
-            for (k, v) in metadata {
-                let k = k.strip_prefix(prefix).unwrap();
-                let id = k
-                    .parse::<EncodablePackageId>()
-                    .with_context(|| internal("invalid encoding of checksum in lockfile"))?
-                    .normalize()?;
-                metadata_map.insert(id, v);
-            }
-        }
-        metadata_map
-    };
-
-    let package = {
-        let mut normalized_packages = Vec::new();
-        if let Some(pkgs) = packages {
-            for pkg in pkgs {
-                let mut pkg = pkg.normalize()?;
-                if pkg.checksum.is_none() {
-                    pkg.checksum = metadata_map.remove(&pkg.id);
-                }
-                normalized_packages.push(pkg);
-            }
-        }
-        if let Some(pkg) = root {
-            let mut pkg = pkg.normalize()?;
-            if pkg.checksum.is_none() {
-                pkg.checksum = metadata_map.remove(&pkg.id);
-            }
-            normalized_packages.push(pkg);
-        }
-        normalized_packages
-    };
-
-    Ok(package)
+pub struct Patch {
+    pub unused: Vec<EncodableDependency>,
 }
 
 pub type Metadata = BTreeMap<String, String>;
 
 impl Patch {
-    pub(crate) fn normalize(self) -> CargoResult<NormalizedPatch> {
-        let unused = self
-            .unused
-            .into_iter()
-            .map(|u| u.normalize())
-            .collect::<Result<Vec<_>, _>>()?;
-        Ok(NormalizedPatch { unused })
-    }
-
     fn is_empty(&self) -> bool {
         self.unused.is_empty()
     }
@@ -192,45 +123,6 @@ pub struct EncodableDependency {
     pub checksum: Option<String>,
     pub dependencies: Option<Vec<EncodablePackageId>>,
     pub replace: Option<EncodablePackageId>,
-}
-
-impl EncodableDependency {
-    pub fn normalize(self) -> CargoResult<NormalizedDependency> {
-        let mut id = PackageIdSpec::new(self.name).with_version(self.version.parse()?);
-        let mut source = None;
-
-        if let Some(s) = self.source {
-            id = id.with_url(s.url.clone()).with_kind(s.kind.clone());
-            source = Some(s);
-        }
-
-        let dependencies = match self.dependencies {
-            Some(deps) => Some(
-                deps.into_iter()
-                    .map(|d| d.normalize())
-                    .collect::<Result<Vec<_>, _>>()?,
-            ),
-            None => None,
-        };
-
-        let replace = match self.replace {
-            Some(replace) => Some(replace.normalize()?),
-            None => None,
-        };
-
-        let rev = match source {
-            Some(s) if matches!(s.kind, SourceKind::Git(..)) => s.precise,
-            _ => None,
-        };
-
-        Ok(NormalizedDependency {
-            id,
-            rev,
-            checksum: self.checksum,
-            dependencies,
-            replace,
-        })
-    }
 }
 
 #[derive(Debug, PartialOrd, Ord, PartialEq, Eq)]
@@ -375,25 +267,9 @@ impl<'de> Deserialize<'de> for EncodableSourceId {
 
 #[derive(Debug, PartialOrd, Ord, PartialEq, Eq)]
 pub struct EncodablePackageId {
-    name: String,
-    version: Option<String>,
-    source: Option<EncodableSourceId>,
-}
-
-impl EncodablePackageId {
-    pub fn normalize(self) -> CargoResult<PackageIdSpec> {
-        let mut id = PackageIdSpec::new(self.name);
-
-        if let Some(version) = self.version {
-            id = id.with_version(version.parse()?);
-        }
-
-        if let Some(source) = self.source {
-            id = id.with_url(source.url).with_kind(source.kind);
-        }
-
-        Ok(id)
-    }
+    pub name: String,
+    pub version: Option<String>,
+    pub source: Option<EncodableSourceId>,
 }
 
 impl fmt::Display for EncodablePackageId {
