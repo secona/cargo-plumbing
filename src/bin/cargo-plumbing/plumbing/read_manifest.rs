@@ -76,10 +76,12 @@ pub(crate) fn exec(gctx: &mut GlobalContext, args: Args) -> CargoResult<()> {
         };
         gctx.shell().print_json(&msg)?;
 
-        // We also want to print the root workspace even if no `--workspace` flag is provided.
-        match ws_config {
+        // If the current manifest is a workspace member, find its root manifest path.
+        let workspace_root = match ws_config {
             WorkspaceConfig::Root(..) => {
-                // Skip if the current manifest *is* the workspace manifest.
+                // The current manifest is already the workspace root, so there is no other
+                // workspace root to find.
+                None
             }
             WorkspaceConfig::Member {
                 root: Some(path_to_root),
@@ -87,41 +89,33 @@ pub(crate) fn exec(gctx: &mut GlobalContext, args: Args) -> CargoResult<()> {
                 // This case is when the workspace members is defined through the package workspace
                 // key. Hence, we make it into a `PathBuf` first.
                 let path_to_root = PathBuf::from(path_to_root);
-                print_workspace_root(gctx, manifest_path, path_to_root)?;
+                Some(path_to_root)
             }
             WorkspaceConfig::Member { root: None } => {
-                // This case is the common case for workspace members where the members are defined
-                // from the workspace manifest
-                if let Some(path_to_root) = find_workspace_root(&manifest_path, gctx)? {
-                    print_workspace_root(gctx, manifest_path, path_to_root)?;
-                }
+                // Find the root directory by searching upwards the filesystem.
+                find_workspace_root(&manifest_path, gctx)?
             }
         };
+
+        if let Some(workspace_root) = workspace_root {
+            let workspace_root = paths::normalize_path(&gctx.cwd().join(workspace_root));
+            let source_id = SourceId::for_manifest_path(&workspace_root)?;
+
+            let (pkg_id, manifest) = match read_manifest(&manifest_path, source_id, gctx)? {
+                EitherManifest::Real(r) => {
+                    (Some(r.package_id().to_spec()), r.normalized_toml().clone())
+                }
+                EitherManifest::Virtual(v) => (None, v.normalized_toml().clone()),
+            };
+
+            let msg = ReadManifestOut::Manifest {
+                path: manifest_path.clone(),
+                pkg_id,
+                manifest,
+            };
+            gctx.shell().print_json(&msg)?;
+        }
     }
-
-    Ok(())
-}
-
-/// Given a manifest path the the path to workspace root, we print the manifest there.
-fn print_workspace_root(
-    gctx: &GlobalContext,
-    manifest_path: PathBuf,
-    path_to_root: PathBuf,
-) -> CargoResult<()> {
-    let workspace_path = paths::normalize_path(&gctx.cwd().join(path_to_root));
-    let source_id = SourceId::for_manifest_path(&workspace_path)?;
-
-    let (pkg_id, manifest) = match read_manifest(&manifest_path, source_id, gctx)? {
-        EitherManifest::Real(r) => (Some(r.package_id().to_spec()), r.normalized_toml().clone()),
-        EitherManifest::Virtual(v) => (None, v.normalized_toml().clone()),
-    };
-
-    let msg = ReadManifestOut::Manifest {
-        path: manifest_path.clone(),
-        pkg_id,
-        manifest,
-    };
-    gctx.shell().print_json(&msg)?;
 
     Ok(())
 }
