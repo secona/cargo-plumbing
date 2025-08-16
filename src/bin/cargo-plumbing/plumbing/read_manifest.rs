@@ -19,10 +19,10 @@ pub(crate) struct Args {
 }
 
 pub(crate) fn exec(gctx: &mut GlobalContext, args: Args) -> CargoResult<()> {
-    let manifest_path = gctx.cwd().join(args.manifest_path);
+    let requested_manifest_path = gctx.cwd().join(args.manifest_path);
 
     if args.workspace {
-        let workspace = Workspace::new(&manifest_path, gctx)?;
+        let workspace = Workspace::new(&requested_manifest_path, gctx)?;
 
         // Here, we print the root Package or the Virtual Manifest of the workspace.
         let msg = match workspace.root_maybe() {
@@ -55,22 +55,23 @@ pub(crate) fn exec(gctx: &mut GlobalContext, args: Args) -> CargoResult<()> {
         }
     } else {
         // As this is the branch without `--workspace`, we want to only read one manifest.
-        let source_id = SourceId::for_manifest_path(&manifest_path)?;
-        let (pkg_id, ws_config, manifest) = match read_manifest(&manifest_path, source_id, gctx)? {
-            EitherManifest::Real(r) => (
-                Some(r.package_id().to_spec()),
-                r.workspace_config().clone(),
-                r.normalized_toml().clone(),
-            ),
-            EitherManifest::Virtual(v) => (
-                None,
-                v.workspace_config().clone(),
-                v.normalized_toml().clone(),
-            ),
-        };
+        let source_id = SourceId::for_manifest_path(&requested_manifest_path)?;
+        let (pkg_id, ws_config, manifest) =
+            match read_manifest(&requested_manifest_path, source_id, gctx)? {
+                EitherManifest::Real(r) => (
+                    Some(r.package_id().to_spec()),
+                    r.workspace_config().clone(),
+                    r.normalized_toml().clone(),
+                ),
+                EitherManifest::Virtual(v) => (
+                    None,
+                    v.workspace_config().clone(),
+                    v.normalized_toml().clone(),
+                ),
+            };
 
         let msg = ReadManifestOut::Manifest {
-            path: manifest_path.clone(),
+            path: requested_manifest_path.clone(),
             pkg_id,
             manifest,
         };
@@ -93,7 +94,7 @@ pub(crate) fn exec(gctx: &mut GlobalContext, args: Args) -> CargoResult<()> {
             }
             WorkspaceConfig::Member { root: None } => {
                 // Find the root directory by searching upwards the filesystem.
-                find_workspace_root(&manifest_path, gctx)?
+                find_workspace_root(&requested_manifest_path, gctx)?
             }
         };
 
@@ -101,13 +102,16 @@ pub(crate) fn exec(gctx: &mut GlobalContext, args: Args) -> CargoResult<()> {
             let ws_manifest_path = paths::normalize_path(&gctx.cwd().join(ws_manifest_path));
             let source_id = SourceId::for_manifest_path(&ws_manifest_path)?;
 
-            let (pkg_id, manifest) = match read_manifest(&manifest_path, source_id, gctx)? {
-                EitherManifest::Real(r) => (Some(r.package_id().to_spec()), r.normalized_toml().clone()),
+            let (pkg_id, manifest) = match read_manifest(&requested_manifest_path, source_id, gctx)?
+            {
+                EitherManifest::Real(r) => {
+                    (Some(r.package_id().to_spec()), r.normalized_toml().clone())
+                }
                 EitherManifest::Virtual(v) => (None, v.normalized_toml().clone()),
             };
 
             let msg = ReadManifestOut::Manifest {
-                path: manifest_path.clone(),
+                path: requested_manifest_path.clone(),
                 pkg_id,
                 manifest,
             };
