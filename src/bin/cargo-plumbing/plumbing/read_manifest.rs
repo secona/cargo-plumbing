@@ -98,33 +98,22 @@ pub(crate) fn exec(gctx: &mut GlobalContext, args: Args) -> CargoResult<()> {
         };
 
         if let Some(ws_manifest_path) = ws_manifest_path {
-            print_workspace_root(gctx, manifest_path, ws_manifest_path)?;
+            let ws_manifest_path = paths::normalize_path(&gctx.cwd().join(ws_manifest_path));
+            let source_id = SourceId::for_manifest_path(&ws_manifest_path)?;
+
+            let (pkg_id, manifest) = match read_manifest(&manifest_path, source_id, gctx)? {
+                EitherManifest::Real(r) => (Some(r.package_id().to_spec()), r.normalized_toml().clone()),
+                EitherManifest::Virtual(v) => (None, v.normalized_toml().clone()),
+            };
+
+            let msg = ReadManifestOut::Manifest {
+                path: manifest_path.clone(),
+                pkg_id,
+                manifest,
+            };
+            gctx.shell().print_json(&msg)?;
         }
     }
-
-    Ok(())
-}
-
-/// Given a manifest path the the path to workspace root, we print the manifest there.
-fn print_workspace_root(
-    gctx: &GlobalContext,
-    manifest_path: PathBuf,
-    path_to_root: PathBuf,
-) -> CargoResult<()> {
-    let workspace_path = paths::normalize_path(&gctx.cwd().join(path_to_root));
-    let source_id = SourceId::for_manifest_path(&workspace_path)?;
-
-    let (pkg_id, manifest) = match read_manifest(&manifest_path, source_id, gctx)? {
-        EitherManifest::Real(r) => (Some(r.package_id().to_spec()), r.normalized_toml().clone()),
-        EitherManifest::Virtual(v) => (None, v.normalized_toml().clone()),
-    };
-
-    let msg = ReadManifestOut::Manifest {
-        path: manifest_path.clone(),
-        pkg_id,
-        manifest,
-    };
-    gctx.shell().print_json(&msg)?;
 
     Ok(())
 }
