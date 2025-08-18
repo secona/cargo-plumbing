@@ -1921,20 +1921,56 @@ fn workspace_member_via_package_workspace_key() {
     "path": "[ROOT]/foo/crate1/Cargo.toml",
     "pkg_id": "path+[ROOTURL]/foo/crate1#0.1.0",
     "reason": "manifest"
+  },
+  {
+    "manifest": {
+      "badges": null,
+      "bench": null,
+      "bin": null,
+      "build-dependencies": null,
+      "build_dependencies": null,
+      "cargo-features": null,
+      "dependencies": null,
+      "dev-dependencies": null,
+      "dev_dependencies": null,
+      "example": null,
+      "features": null,
+      "hints": null,
+      "lib": null,
+      "lints": null,
+      "package": null,
+      "patch": null,
+      "profile": null,
+      "project": null,
+      "replace": null,
+      "target": null,
+      "test": null,
+      "workspace": {
+        "default-members": null,
+        "dependencies": {
+          "a": "1.0.0"
+        },
+        "exclude": null,
+        "lints": null,
+        "members": [
+          "../crate1",
+          "../crate2"
+        ],
+        "metadata": null,
+        "package": null,
+        "resolver": "3"
+      }
+    },
+    "path": "[ROOT]/foo/workspace-root/Cargo.toml",
+    "pkg_id": null,
+    "reason": "manifest"
   }
 ]
 "#]]
             .is_json()
             .against_jsonlines(),
         )
-        .with_stderr_data(str![[r#"
-[ERROR] failed to read `[ROOT]/workspace-root`
-
-Caused by:
-  [NOT_FOUND]
-
-"#]])
-        .with_status(101)
+        .with_status(0)
         .run();
 
     p.cargo_plumbing("plumbing read-manifest")

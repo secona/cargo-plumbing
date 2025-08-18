@@ -1,5 +1,6 @@
 use std::path::PathBuf;
 
+use anyhow::Context as _;
 use cargo::core::{
     find_workspace_root, EitherManifest, MaybePackage, SourceId, Workspace, WorkspaceConfig,
 };
@@ -87,10 +88,14 @@ pub(crate) fn exec(gctx: &mut GlobalContext, args: Args) -> CargoResult<()> {
             WorkspaceConfig::Member {
                 root: Some(path_to_root),
             } => {
-                // This case is when the workspace members is defined through the package workspace
-                // key. Hence, we make it into a `PathBuf` first.
-                let path_to_root = PathBuf::from(path_to_root);
-                Some(path_to_root)
+                // The member's `[package.workspace]` key points to the root directory
+                Some(
+                    requested_manifest_path
+                        .parent()
+                        .context("manifest-path can't be root")?
+                        .join(path_to_root)
+                        .join("Cargo.toml"),
+                )
             }
             WorkspaceConfig::Member { root: None } => {
                 // Find the root directory by searching upwards the filesystem.
