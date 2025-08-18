@@ -102,8 +102,7 @@ pub(crate) fn exec(gctx: &mut GlobalContext, args: Args) -> CargoResult<()> {
             let ws_manifest_path = paths::normalize_path(&gctx.cwd().join(ws_manifest_path));
             let source_id = SourceId::for_manifest_path(&ws_manifest_path)?;
 
-            let (pkg_id, manifest) = match read_manifest(&requested_manifest_path, source_id, gctx)?
-            {
+            let (pkg_id, manifest) = match read_manifest(&ws_manifest_path, source_id, gctx)? {
                 EitherManifest::Real(r) => {
                     (Some(r.package_id().to_spec()), r.normalized_toml().clone())
                 }
@@ -111,7 +110,7 @@ pub(crate) fn exec(gctx: &mut GlobalContext, args: Args) -> CargoResult<()> {
             };
 
             let msg = ReadManifestOut::Manifest {
-                path: requested_manifest_path.clone(),
+                path: ws_manifest_path.clone(),
                 pkg_id,
                 manifest,
             };
