@@ -188,9 +188,9 @@ fn run(args: &Args) -> CargoResult<()> {
         child.wait().expect("failed to wait for lock-dependencies");
     }
 
-    let _features = {
+    let features = {
         let ids = manifests
-            .into_iter()
+            .iter()
             .map(|msg| serde_json::to_string(&msg))
             .collect::<Result<Vec<_>, _>>()?
             .join("\n");
@@ -225,6 +225,52 @@ fn run(args: &Args) -> CargoResult<()> {
                 .expect("failed to write to stdin");
             stdin
                 .write_all(&locked_deps)
+                .expect("failed to write to stdin");
+        }
+
+        let messages = {
+            let stdout = child.stdout.take().expect("failed to get stdout");
+            LocateManifestOut::parse_stream(BufReader::new(stdout))
+        };
+
+        child.wait().expect("failed to wait for resolve-features");
+        messages.collect::<Result<Vec<_>, _>>()?
+    };
+
+    let _units = {
+        let ids = manifests
+            .iter()
+            .map(|msg| serde_json::to_string(&msg))
+            .collect::<Result<Vec<_>, _>>()?
+            .join("\n");
+        let features = features
+            .iter()
+            .map(|msg| serde_json::to_string(&msg))
+            .collect::<Result<Vec<_>, _>>()?
+            .join("\n");
+
+        let mut cmd = cargo_plumbing_bin();
+        cmd.args(["plumbing", "resolve-features"])
+            .stdin(Stdio::piped())
+            .stdout(Stdio::piped());
+
+        if let Some(manifest_path) = &args.manifest_path {
+            cmd.arg("--manifest-path");
+            cmd.arg(manifest_path);
+        }
+
+        let mut child = cmd.spawn().expect("failed to spawn resolve-features");
+
+        {
+            let mut stdin = child.stdin.take().expect("failed to take stdin");
+            stdin
+                .write_all(ids.as_bytes())
+                .expect("failed to write to stdin");
+            stdin
+                .write_all(&locked_deps)
+                .expect("failed to write to stdin");
+            stdin
+                .write_all(features.as_bytes())
                 .expect("failed to write to stdin");
         }
 
