@@ -76,10 +76,12 @@ pub(crate) fn exec(gctx: &mut GlobalContext, args: Args) -> CargoResult<()> {
         };
         gctx.shell().print_json(&msg)?;
 
-        // We also want to print the root workspace even if no `--workspace` flag is provided.
-        match ws_config {
+        // If the current manifest is a workspace member, find its workspace manifest path.
+        let ws_manifest_path = match ws_config {
             WorkspaceConfig::Root(..) => {
-                // Skip if the current manifest *is* the workspace manifest.
+                // The current manifest is already the workspace root, so there is no other
+                // workspace root to find.
+                None
             }
             WorkspaceConfig::Member {
                 root: Some(path_to_root),
@@ -87,16 +89,17 @@ pub(crate) fn exec(gctx: &mut GlobalContext, args: Args) -> CargoResult<()> {
                 // This case is when the workspace members is defined through the package workspace
                 // key. Hence, we make it into a `PathBuf` first.
                 let path_to_root = PathBuf::from(path_to_root);
-                print_workspace_root(gctx, manifest_path, path_to_root)?;
+                Some(path_to_root)
             }
             WorkspaceConfig::Member { root: None } => {
-                // This case is the common case for workspace members where the members are defined
-                // from the workspace manifest
-                if let Some(path_to_root) = find_workspace_root(&manifest_path, gctx)? {
-                    print_workspace_root(gctx, manifest_path, path_to_root)?;
-                }
+                // Find the root directory by searching upwards the filesystem.
+                find_workspace_root(&manifest_path, gctx)?
             }
         };
+
+        if let Some(ws_manifest_path) = ws_manifest_path {
+            print_workspace_root(gctx, manifest_path, ws_manifest_path)?;
+        }
     }
 
     Ok(())
