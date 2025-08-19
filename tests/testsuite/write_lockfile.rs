@@ -229,6 +229,8 @@ fn package_with_git_deps_with_previous_lockfile() {
     let branch_name = "master";
     let url = git_p.url();
 
+    let locked_commit_hash = git_r.head().unwrap().target().unwrap().to_string();
+
     let p = project()
         .file("a/src/lib.rs", "")
         .file(
@@ -297,17 +299,17 @@ version = 4
 [[package]]
 name = "a"
 version = "1.0.0"
-source = "git+[ROOTURL]/my-git-repo?branch=master"
+source = "git+[ROOTURL]/my-git-repo?branch=master#REV"
 
 [[package]]
 name = "a"
 version = "1.0.0"
-source = "git+[ROOTURL]/my-git-repo?rev=v1.0.0"
+source = "git+[ROOTURL]/my-git-repo?rev=v1.0.0#REV"
 
 [[package]]
 name = "a"
 version = "1.0.0"
-source = "git+[ROOTURL]/my-git-repo"
+source = "git+[ROOTURL]/my-git-repo#REV"
 
 [[package]]
 name = "read-lockfile-test"
@@ -317,7 +319,8 @@ dependencies = [
  "a 1.0.0 (git+[ROOTURL]/my-git-repo?rev=v1.0.0)",
  "a 1.0.0 (git+[ROOTURL]/my-git-repo)",
 ]
-"##;
+"##
+    .replace("REV", &locked_commit_hash);
 
     assert_e2e().eq(p.read_lockfile(), lockfile_value);
 }

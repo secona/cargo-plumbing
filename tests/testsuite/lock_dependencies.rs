@@ -788,15 +788,18 @@ fn lock_dependencies_with_git_deps_with_previous_lockfile() {
   },
   {
     "id": "git+[ROOTURL]/my-git-repo?branch=master#a@1.0.0",
-    "reason": "locked-package"
+    "reason": "locked-package",
+    "rev": "REV"
   },
   {
     "id": "git+[ROOTURL]/my-git-repo?rev=v1.0.0#a@1.0.0",
-    "reason": "locked-package"
+    "reason": "locked-package",
+    "rev": "REV"
   },
   {
     "id": "git+[ROOTURL]/my-git-repo#a@1.0.0",
-    "reason": "locked-package"
+    "reason": "locked-package",
+    "rev": "REV"
   },
   {
     "dependencies": [
@@ -808,7 +811,8 @@ fn lock_dependencies_with_git_deps_with_previous_lockfile() {
     "reason": "locked-package"
   }
 ]
-"#;
+"#
+    .replace("REV", &locked_commit_hash);
 
     assert_e2e().eq(
         latest_lock_result,
