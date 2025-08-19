@@ -19,11 +19,19 @@ use cargo_plumbing_schemas::lockfile::NormalizedPatch;
 #[derive(Debug, clap::Args)]
 pub(crate) struct Args {
     /// Path to the manifest file
+    // HACK: We are reading manifests from disk and not purely from stdin because of cargo API
+    // limitations.
+    //
+    // See: https://github.com/crate-ci/cargo-plumbing/issues/82
     #[arg(long)]
     manifest_path: Option<PathBuf>,
 }
 
 pub(crate) fn exec(gctx: &GlobalContext, args: Args) -> CargoResult<()> {
+    // HACK: We are reading manifests from disk and not purely from stdin because of cargo API
+    // limitations.
+    //
+    // See: https://github.com/crate-ci/cargo-plumbing/issues/82
     let manifest_path = args
         .manifest_path
         .unwrap_or(env::current_dir()?.join("Cargo.toml"));

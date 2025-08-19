@@ -14,6 +14,10 @@ use cargo_plumbing_schemas::resolve_features::{ResolveFeaturesIn, ResolveFeature
 #[derive(Debug, clap::Args)]
 pub(crate) struct Args {
     /// Path to the manifest file
+    // HACK: We are reading manifests from disk and not purely from stdin because of cargo API
+    // limitations.
+    //
+    // See: https://github.com/crate-ci/cargo-plumbing/issues/82
     #[arg(long)]
     manifest_path: Option<PathBuf>,
     /// List of features to activate
@@ -44,6 +48,10 @@ pub(crate) fn exec(gctx: &mut GlobalContext, args: Args) -> CargoResult<()> {
         anyhow::bail!("input must be piped from a file or another command");
     }
 
+    // HACK: We are reading manifests from disk and not purely from stdin because of cargo API
+    // limitations.
+    //
+    // See: https://github.com/crate-ci/cargo-plumbing/issues/82
     let manifest_path = args
         .manifest_path
         .unwrap_or(env::current_dir()?.join("Cargo.toml"));
