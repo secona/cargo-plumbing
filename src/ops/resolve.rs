@@ -6,7 +6,9 @@ use cargo::core::{
 };
 use cargo::util::Graph;
 use cargo::CargoResult;
-use cargo_plumbing_schemas::lockfile::{NormalizedDependency, NormalizedPatch, NormalizedResolve};
+use cargo_plumbing_schemas::lockfile::{
+    NormalizedDependency, NormalizedPatch, NormalizedResolve, Precise,
+};
 
 use crate::cargo::core::resolver::encode::{
     build_path_deps, EncodableDependency, EncodablePackageId, EncodableResolve, Metadata, Patch,
@@ -34,7 +36,7 @@ pub fn into_resolve(
             }
 
             let source_id = get_path_deps_source_id(&path_deps, pkg.id.name(), pkg.id.version());
-            let Ok(Some(id)) = spec_to_id(pkg.id.clone(), source_id) else {
+            let Ok(Some(id)) = spec_to_id(pkg.id.clone(), source_id, pkg.rev.clone()) else {
                 continue;
             };
 
@@ -107,7 +109,7 @@ pub fn into_resolve(
             };
 
             for edge in deps.iter() {
-                let package_id = spec_to_id(edge.clone(), None)?;
+                let package_id = spec_to_id(edge.clone(), None, None)?;
                 let source_id = package_id.map(|p| p.source_id());
                 if let Some(to_depend_on) = lookup_id(edge, source_id.as_ref()) {
                     g.link(*id, to_depend_on);
@@ -135,7 +137,7 @@ pub fn into_resolve(
         let mut unused_patches = Vec::new();
         for pkg in patch.unused {
             let source_id = get_path_deps_source_id(&path_deps, pkg.id.name(), pkg.id.version());
-            let Ok(Some(id)) = spec_to_id(pkg.id.clone(), source_id) else {
+            let Ok(Some(id)) = spec_to_id(pkg.id.clone(), source_id, pkg.rev) else {
                 continue;
             };
             unused_patches.push(id);
@@ -195,13 +197,23 @@ pub fn get_path_deps_source_id<'a>(
 pub fn spec_to_id(
     spec: PackageIdSpec,
     source_id: Option<&SourceId>,
+    git_rev: Option<Precise>,
 ) -> CargoResult<Option<PackageId>> {
     if let Some(kind) = spec.kind() {
         if let Some(url) = spec.url() {
             if let Some(version) = spec.version() {
                 let name = spec.name();
                 let source_id = match kind {
-                    SourceKind::Git(git_ref) => SourceId::for_git(url, git_ref.clone()),
+                    // We're splitting the git reference into a separate field called `rev`. This
+                    // means the GitReference from source itself may or may not have what we need.
+                    // Therefore, we need a `git_rev` to construct the source ID.
+                    SourceKind::Git(git_reference) => {
+                        let mut source_id = SourceId::for_git(url, git_reference.clone())?;
+                        if let Some(Precise::GitUrlFragment(fragment)) = git_rev {
+                            source_id = source_id.with_git_precise(Some(fragment));
+                        }
+                        Ok(source_id)
+                    }
                     SourceKind::Registry | SourceKind::SparseRegistry => {
                         SourceId::for_registry(url)
                     }

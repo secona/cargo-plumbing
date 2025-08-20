@@ -673,6 +673,154 @@ fn lock_dependencies_conservatively_using_previous_lock() {
 }
 
 #[cargo_test]
+fn lock_dependencies_with_git_deps_with_previous_lockfile() {
+    let (git_p, git_r) = git::new_repo("my-git-repo", |p| {
+        p.file("Cargo.toml", &basic_manifest("a", "1.0.0"))
+            .file("src/lib.rs", "")
+    });
+
+    let ref_1 = "v1.0.0";
+    git::tag(&git_r, ref_1);
+
+    let branch_name = "master";
+    let url = git_p.url();
+
+    let locked_commit_hash = git_r.head().unwrap().target().unwrap().to_string();
+
+    let p = project()
+        .file("a/src/lib.rs", "")
+        .file(
+            "a/Cargo.toml",
+            r#"
+                [package]
+                name = "a"
+                version = "1.0.0"
+                authors = []
+                edition = "2024"
+            "#,
+        )
+        .file("src/lib.rs", "")
+        .file(
+            "Cargo.toml",
+            &format!(
+                r#"
+                    [package]
+                    name = "read-lockfile-test"
+                    version = "0.1.0"
+                    authors = []
+                    edition = "2024"
+
+                    [dependencies]
+                    a1 = {{ package = "a", git = "{url}", rev = "{ref_1}" }}
+                    a2 = {{ package = "a", git = "{url}" }}
+                    a3 = {{ package = "a", git = "{url}", branch = "{branch_name}" }}
+                "#,
+            ),
+        )
+        .build();
+    let manifest_path = p.root().join("Cargo.toml");
+    let lockfile_path = p.root().join("Cargo.lock");
+
+    p.cargo_global("check").run();
+
+    let out = p
+        .cargo_plumbing("plumbing read-lockfile")
+        .arg("--lockfile-path")
+        .arg(&lockfile_path)
+        .run();
+    let previous_lock_result = String::from_utf8(out.stdout).unwrap();
+
+    let previous_lock_value = r#"
+[
+  {
+    "reason": "lockfile",
+    "version": 4
+  },
+  {
+    "id": "git+[ROOTURL]/my-git-repo?branch=master#a@1.0.0",
+    "reason": "locked-package",
+    "rev": "REV"
+  },
+  {
+    "id": "git+[ROOTURL]/my-git-repo?rev=v1.0.0#a@1.0.0",
+    "reason": "locked-package",
+    "rev": "REV"
+  },
+  {
+    "id": "git+[ROOTURL]/my-git-repo#a@1.0.0",
+    "reason": "locked-package",
+    "rev": "REV"
+  },
+  {
+    "dependencies": [
+      "git+[ROOTURL]/my-git-repo?branch=master#a@1.0.0",
+      "git+[ROOTURL]/my-git-repo?rev=v1.0.0#a@1.0.0",
+      "git+[ROOTURL]/my-git-repo#a@1.0.0"
+    ],
+    "id": "read-lockfile-test@0.1.0",
+    "reason": "locked-package"
+  }
+]
+"#
+    .replace("REV", &locked_commit_hash);
+
+    assert_e2e().eq(
+        &previous_lock_result,
+        previous_lock_value.is_json().against_jsonlines(),
+    );
+
+    git_p.change_file("src/lib.rs", "# simulate change");
+    git::commit(&git_r);
+
+    let out = p
+        .cargo_plumbing("plumbing lock-dependencies")
+        .arg("--manifest-path")
+        .arg(&manifest_path)
+        .with_stdin(previous_lock_result)
+        .run();
+    let latest_lock_result = String::from_utf8(out.stdout).unwrap();
+
+    let latest_lock_value = r#"
+[
+  {
+    "reason": "lockfile",
+    "version": 4
+  },
+  {
+    "id": "git+[ROOTURL]/my-git-repo?branch=master#a@1.0.0",
+    "reason": "locked-package",
+    "rev": "REV"
+  },
+  {
+    "id": "git+[ROOTURL]/my-git-repo?rev=v1.0.0#a@1.0.0",
+    "reason": "locked-package",
+    "rev": "REV"
+  },
+  {
+    "id": "git+[ROOTURL]/my-git-repo#a@1.0.0",
+    "reason": "locked-package",
+    "rev": "REV"
+  },
+  {
+    "dependencies": [
+      "git+[ROOTURL]/my-git-repo?branch=master#a@1.0.0",
+      "git+[ROOTURL]/my-git-repo?rev=v1.0.0#a@1.0.0",
+      "git+[ROOTURL]/my-git-repo#a@1.0.0"
+    ],
+    "id": "read-lockfile-test@0.1.0",
+    "reason": "locked-package"
+  }
+]
+"#
+    .replace("REV", &locked_commit_hash);
+
+    assert_e2e().eq(
+        latest_lock_result,
+        latest_lock_value.is_json().against_jsonlines(),
+    );
+}
+
+#[cargo_test]
 fn lock_dependencies_conservatively_using_previous_lock_with_old_lockfile_version() {
     let cksum = Package::new("a", "1.0.0").publish();
 
