@@ -114,7 +114,8 @@ fn package_with_deps() {
     },
     "path": "[ROOT]/foo/Cargo.toml",
     "pkg_id": "path+[ROOTURL]/foo#read-manifest-test@0.1.0",
-    "reason": "manifest"
+    "reason": "manifest",
+    "workspace": true
   }
 ]
 "#]]
@@ -211,7 +212,8 @@ fn package_with_deps() {
     },
     "path": "[ROOT]/foo/Cargo.toml",
     "pkg_id": "path+[ROOTURL]/foo#read-manifest-test@0.1.0",
-    "reason": "manifest"
+    "reason": "manifest",
+    "workspace": true
   }
 ]
 "#]]
@@ -367,7 +369,8 @@ fn workspace_package_with_inherited_deps() {
     },
     "path": "[ROOT]/foo/Cargo.toml",
     "pkg_id": "path+[ROOTURL]/foo#read-manifest-test@0.1.0",
-    "reason": "manifest"
+    "reason": "manifest",
+    "workspace": true
   }
 ]
 "#]]
@@ -494,7 +497,8 @@ fn workspace_package_with_inherited_deps() {
     },
     "path": "[ROOT]/foo/Cargo.toml",
     "pkg_id": "path+[ROOTURL]/foo#read-manifest-test@0.1.0",
-    "reason": "manifest"
+    "reason": "manifest",
+    "workspace": true
   }
 ]
 "#]]
@@ -643,7 +647,8 @@ fn workspace_package_with_members() {
     },
     "path": "[ROOT]/foo/Cargo.toml",
     "pkg_id": "path+[ROOTURL]/foo#read-manifest-test@0.1.0",
-    "reason": "manifest"
+    "reason": "manifest",
+    "workspace": true
   }
 ]
 "#]]
@@ -750,7 +755,8 @@ fn workspace_package_with_members() {
     },
     "path": "[ROOT]/foo/Cargo.toml",
     "pkg_id": "path+[ROOTURL]/foo#read-manifest-test@0.1.0",
-    "reason": "manifest"
+    "reason": "manifest",
+    "workspace": true
   },
   {
     "manifest": {
@@ -998,7 +1004,8 @@ fn virtual_workspace_with_members() {
     },
     "path": "[ROOT]/foo/Cargo.toml",
     "pkg_id": null,
-    "reason": "manifest"
+    "reason": "manifest",
+    "workspace": true
   }
 ]
 "#]]
@@ -1054,7 +1061,8 @@ fn virtual_workspace_with_members() {
     },
     "path": "[ROOT]/foo/Cargo.toml",
     "pkg_id": null,
-    "reason": "manifest"
+    "reason": "manifest",
+    "workspace": true
   },
   {
     "manifest": {
@@ -1470,7 +1478,8 @@ fn workspace_member_with_inherited_deps() {
     },
     "path": "[ROOT]/foo/Cargo.toml",
     "pkg_id": "path+[ROOTURL]/foo#read-manifest-test@0.1.0",
-    "reason": "manifest"
+    "reason": "manifest",
+    "workspace": true
   }
 ]
 "#]]
@@ -1579,7 +1588,8 @@ fn workspace_member_with_inherited_deps() {
     },
     "path": "[ROOT]/foo/Cargo.toml",
     "pkg_id": "path+[ROOTURL]/foo#read-manifest-test@0.1.0",
-    "reason": "manifest"
+    "reason": "manifest",
+    "workspace": true
   },
   {
     "manifest": {
@@ -1963,7 +1973,8 @@ fn workspace_member_via_package_workspace_key() {
     },
     "path": "[ROOT]/foo/workspace-root/Cargo.toml",
     "pkg_id": null,
-    "reason": "manifest"
+    "reason": "manifest",
+    "workspace": true
   }
 ]
 "#]]
@@ -2021,7 +2032,8 @@ fn workspace_member_via_package_workspace_key() {
     },
     "path": "[ROOT]/foo/workspace-root/Cargo.toml",
     "pkg_id": null,
-    "reason": "manifest"
+    "reason": "manifest",
+    "workspace": true
   },
   {
     "manifest": {
