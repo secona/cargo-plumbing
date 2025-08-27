@@ -1,6 +1,7 @@
 use std::path::PathBuf;
 
 use anyhow::Context as _;
+use camino::Utf8PathBuf;
 use cargo::core::{
     find_workspace_root, EitherManifest, MaybePackage, SourceId, Workspace, WorkspaceConfig,
 };
@@ -29,13 +30,13 @@ pub(crate) fn exec(gctx: &mut GlobalContext, args: Args) -> CargoResult<()> {
         let msg = match workspace.root_maybe() {
             MaybePackage::Package(pkg) => ReadManifestOut::Manifest {
                 workspace: true,
-                path: gctx.cwd().join(pkg.manifest_path()),
+                path: Utf8PathBuf::try_from(gctx.cwd().join(pkg.manifest_path()))?,
                 pkg_id: Some(pkg.package_id().to_spec()),
                 manifest: pkg.manifest().normalized_toml().clone(),
             },
             MaybePackage::Virtual(v) => ReadManifestOut::Manifest {
                 workspace: true,
-                path: gctx.cwd().join(workspace.root_manifest()),
+                path: Utf8PathBuf::try_from(gctx.cwd().join(workspace.root_manifest()))?,
                 pkg_id: None,
                 manifest: v.normalized_toml().clone(),
             },
@@ -51,7 +52,7 @@ pub(crate) fn exec(gctx: &mut GlobalContext, args: Args) -> CargoResult<()> {
         {
             let msg = ReadManifestOut::Manifest {
                 workspace: false,
-                path: gctx.cwd().join(member.manifest_path()),
+                path: Utf8PathBuf::try_from(gctx.cwd().join(member.manifest_path()))?,
                 pkg_id: Some(member.package_id().to_spec()),
                 manifest: member.manifest().normalized_toml().clone(),
             };
@@ -101,7 +102,7 @@ pub(crate) fn exec(gctx: &mut GlobalContext, args: Args) -> CargoResult<()> {
 
         let msg = ReadManifestOut::Manifest {
             workspace: ws_manifest_path.is_none(),
-            path: requested_manifest_path.clone(),
+            path: Utf8PathBuf::try_from(requested_manifest_path.clone())?,
             pkg_id,
             manifest,
         };
@@ -120,7 +121,7 @@ pub(crate) fn exec(gctx: &mut GlobalContext, args: Args) -> CargoResult<()> {
 
             let msg = ReadManifestOut::Manifest {
                 workspace: true,
-                path: ws_manifest_path.clone(),
+                path: Utf8PathBuf::try_from(ws_manifest_path.clone())?,
                 pkg_id,
                 manifest,
             };
