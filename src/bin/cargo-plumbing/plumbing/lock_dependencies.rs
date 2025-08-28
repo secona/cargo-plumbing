@@ -99,7 +99,7 @@ pub(crate) fn exec(gctx: &GlobalContext, args: Args) -> CargoResult<()> {
     gctx.shell()
         .print_json(&LockDependenciesOut::Lockfile { version })?;
 
-    for package in normalize_packages(None, Some(packages), Some(metadata))? {
+    for package in normalize_packages(None, Some(packages), Some(metadata), None)? {
         gctx.shell()
             .print_json(&LockDependenciesOut::LockedPackage { package })?;
     }

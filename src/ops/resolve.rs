@@ -245,9 +245,16 @@ pub fn spec_to_id(
 ///
 /// [`ReadLockfileOut`]: cargo_plumbing_schemas::read_lockfile::ReadLockfileOut
 pub fn normalize_resolve(resolve: EncodableResolve) -> CargoResult<NormalizedResolve> {
-    let package = normalize_packages(resolve.root, resolve.package, resolve.metadata)?;
+    let mut version: u32 = resolve.version.unwrap_or(1);
+    let package = normalize_packages(
+        resolve.root,
+        resolve.package,
+        resolve.metadata,
+        Some(&mut version),
+    )?;
 
     Ok(NormalizedResolve {
+        version,
         package,
         patch: normalize_patch(resolve.patch)?,
     })
@@ -262,10 +269,14 @@ pub fn normalize_resolve(resolve: EncodableResolve) -> CargoResult<NormalizedRes
 /// This function normalizes these packages by moving the root package into the list of packages
 /// and move the checksums to be with their respective packages instead of separated in another
 /// table.
+///
+/// Arguments:
+/// - `version` -- `Some` infers lockfile version, while `None` doesn't.
 pub fn normalize_packages(
     root: Option<EncodableDependency>,
     packages: Option<Vec<EncodableDependency>>,
     metadata: Option<Metadata>,
+    mut version: Option<&mut u32>,
 ) -> CargoResult<Vec<NormalizedDependency>> {
     // We first parse the checksums to be indexable by `PackageIdSpec`. The metadata table
     // itself has keys prefixed with "checksum " then followed by an `EncodablePackageId`.
@@ -296,6 +307,12 @@ pub fn normalize_packages(
                     // If the checksum does not exist, we take it from the parsed metadata table we
                     // created earlier.
                     pkg.checksum = metadata_map.remove(&pkg.id);
+                } else {
+                    // Here, it means that the checksum is directly on package, which means that
+                    // the lockfile version is at least V2.
+                    if let Some(v) = version.as_mut() {
+                        **v = (**v).max(2);
+                    }
                 }
                 normalized_packages.push(pkg);
             }

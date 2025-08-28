@@ -16,6 +16,7 @@ use serde::{Deserialize, Deserializer, Serialize, Serializer};
 #[serde(rename_all = "snake_case")]
 #[cfg_attr(feature = "unstable-schema", derive(schemars::JsonSchema))]
 pub struct NormalizedResolve {
+    pub version: u32,
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub package: Vec<NormalizedDependency>,
     #[serde(default, skip_serializing_if = "NormalizedPatch::is_empty")]
