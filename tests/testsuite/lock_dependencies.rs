@@ -877,7 +877,7 @@ fn lock_dependencies_conservatively_using_previous_lock_with_old_lockfile_versio
 [
   {
     "reason": "lockfile",
-    "version": null
+    "version": 1
   },
   {
     "reason": "locked-package",
@@ -916,16 +916,15 @@ fn lock_dependencies_conservatively_using_previous_lock_with_old_lockfile_versio
     "version": null
   },
   {
-    "reason": "locked-package",
     "id": "registry+https://github.com/rust-lang/crates.io-index#a@1.0.0",
-    "checksum": "3a351dafbc8a3a9cba7c06dfe8caa11a3a45f800a336bb5b913a8f1e2652d454"
+    "reason": "locked-package"
   },
   {
-    "reason": "locked-package",
-    "id": "lock-dependencies-test@0.1.0",
     "dependencies": [
-      "a"
-    ]
+      "registry+https://github.com/rust-lang/crates.io-index#a@1.0.0"
+    ],
+    "id": "lock-dependencies-test@0.1.0",
+    "reason": "locked-package"
   }
 ]
 "#]]

@@ -602,19 +602,19 @@ fn old_lockfile() {
 [
   {
     "reason": "lockfile",
-    "version": null
+    "version": 1
   },
   {
-    "reason": "locked-package",
+    "checksum": "3436ae58a84bb2033accec0cb50c6611f312249899579714793e0d0509470cd9",
     "id": "registry+https://github.com/rust-lang/crates.io-index#a@0.1.0",
-    "checksum": "3436ae58a84bb2033accec0cb50c6611f312249899579714793e0d0509470cd9"
+    "reason": "locked-package"
   },
   {
-    "reason": "locked-package",
-    "id": "foo@0.0.1",
     "dependencies": [
       "registry+https://github.com/rust-lang/crates.io-index#a@0.1.0"
-    ]
+    ],
+    "id": "foo@0.0.1",
+    "reason": "locked-package"
   }
 ]
 "#]]

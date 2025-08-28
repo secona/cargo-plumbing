@@ -15,7 +15,7 @@ use crate::MessageIter;
 #[allow(clippy::large_enum_variant)]
 pub enum ReadLockfileOut {
     Lockfile {
-        version: Option<u32>,
+        version: u32,
     },
     /// The locked package from the lockfile
     ///
