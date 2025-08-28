@@ -106,7 +106,7 @@ fn run(args: &Args) -> CargoResult<()> {
         });
 
         let ReadManifestOut::Manifest { path, .. } = ws_manifest.unwrap();
-        path.join("Cargo.lock")
+        path.join("Cargo.lock").into()
     });
 
     let lockfile = {

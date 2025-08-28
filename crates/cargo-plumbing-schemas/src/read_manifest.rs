@@ -1,7 +1,8 @@
 //! Messages used by `cargo plumbing read-manifest` command
 
-use std::{io::Read, marker::PhantomData, path::PathBuf};
+use std::{io::Read, marker::PhantomData};
 
+use camino::Utf8PathBuf;
 use cargo_util_schemas::core::PackageIdSpec;
 pub use cargo_util_schemas::manifest::TomlManifest;
 use serde::{Deserialize, Serialize};
@@ -18,7 +19,8 @@ pub enum ReadManifestOut {
         #[serde(default, skip_serializing_if = "std::ops::Not::not")]
         workspace: bool,
         /// The path to the manifest file that was read.
-        path: PathBuf,
+        #[cfg_attr(feature = "unstable-schema", schemars(with = "String"))]
+        path: Utf8PathBuf,
         /// The package ID specification.
         ///
         /// This command also outputs virtual manifests and virtual manifests don't have
