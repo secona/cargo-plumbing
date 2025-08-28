@@ -913,7 +913,7 @@ fn lock_dependencies_conservatively_using_previous_lock_with_old_lockfile_versio
 [
   {
     "reason": "lockfile",
-    "version": null
+    "version": 1
   },
   {
     "id": "registry+https://github.com/rust-lang/crates.io-index#a@1.0.0",
