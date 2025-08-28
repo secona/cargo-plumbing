@@ -7,10 +7,7 @@
       "type": "object",
       "properties": {
         "version": {
-          "type": [
-            "integer",
-            "null"
-          ],
+          "type": "integer",
           "format": "uint32",
           "minimum": 0
         },
@@ -20,7 +17,8 @@
         }
       },
       "required": [
-        "reason"
+        "reason",
+        "version"
       ]
     },
     {

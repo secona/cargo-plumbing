@@ -34,10 +34,10 @@ pub(crate) fn exec(gctx: &GlobalContext, args: Args) -> CargoResult<()> {
         .with_context(|| format!("failed to read file: {}", lock_f.path().display()))?;
 
     let v: EncodableResolve = toml::from_str(&lock_s)?;
-    gctx.shell()
-        .print_json(&ReadLockfileOut::Lockfile { version: v.version })?;
-
     let n = normalize_resolve(v)?;
+
+    gctx.shell()
+        .print_json(&ReadLockfileOut::Lockfile { version: n.version })?;
     for package in n.package {
         gctx.shell()
             .print_json(&ReadLockfileOut::LockedPackage { package })?;

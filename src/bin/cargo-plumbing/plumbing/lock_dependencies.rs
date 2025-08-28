@@ -91,15 +91,16 @@ pub(crate) fn exec(gctx: &GlobalContext, args: Args) -> CargoResult<()> {
     let metadata = resolve.metadata().clone();
 
     let version = match resolve.version() {
-        ResolveVersion::V5 => Some(5),
-        ResolveVersion::V4 => Some(4),
-        ResolveVersion::V3 => Some(3),
-        ResolveVersion::V2 | ResolveVersion::V1 => None,
+        ResolveVersion::V5 => 5,
+        ResolveVersion::V4 => 4,
+        ResolveVersion::V3 => 3,
+        ResolveVersion::V2 => 2,
+        ResolveVersion::V1 => 1,
     };
     gctx.shell()
         .print_json(&LockDependenciesOut::Lockfile { version })?;
 
-    for package in normalize_packages(None, Some(packages), Some(metadata))? {
+    for package in normalize_packages(None, Some(packages), Some(metadata), None)? {
         gctx.shell()
             .print_json(&LockDependenciesOut::LockedPackage { package })?;
     }
