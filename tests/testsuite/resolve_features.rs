@@ -58,6 +58,7 @@ fn package_with_path_deps() {
         .unwrap()
         .join("\n");
     stdin.push_str(&out);
+    stdin.push('\n');
     let out = p
         .cargo_plumbing("plumbing read-lockfile")
         .arg("--lockfile-path")
@@ -172,6 +173,7 @@ fn package_with_varying_deps_sources() {
         .unwrap()
         .join("\n");
     stdin.push_str(&out);
+    stdin.push('\n');
     let out = p
         .cargo_plumbing("plumbing read-lockfile")
         .arg("--lockfile-path")
@@ -275,6 +277,7 @@ fn package_with_features() {
         .unwrap()
         .join("\n");
     stdin.push_str(&out);
+    stdin.push('\n');
     let out = p
         .cargo_plumbing("plumbing read-lockfile")
         .arg("--lockfile-path")
@@ -457,6 +460,7 @@ fn package_with_optional_dep_without_features() {
         .unwrap()
         .join("\n");
     stdin.push_str(&out);
+    stdin.push('\n');
     let out = p
         .cargo_plumbing("plumbing read-lockfile")
         .arg("--lockfile-path")
@@ -596,6 +600,7 @@ fn package_with_proc_macro_deps_features() {
         .unwrap()
         .join("\n");
     stdin.push_str(&out);
+    stdin.push('\n');
     let out = p
         .cargo_plumbing("plumbing read-lockfile")
         .arg("--lockfile-path")
@@ -685,6 +690,7 @@ fn package_with_target_specific_dep() {
         .unwrap()
         .join("\n");
     stdin.push_str(&out);
+    stdin.push('\n');
     let out = p
         .cargo_plumbing("plumbing read-lockfile")
         .arg("--lockfile-path")
@@ -804,6 +810,7 @@ fn workspace_package_with_members_with_features() {
         .unwrap()
         .join("\n");
     stdin.push_str(&out);
+    stdin.push('\n');
     let out = p
         .cargo_plumbing("plumbing read-lockfile")
         .arg("--lockfile-path")
@@ -1011,6 +1018,7 @@ fn package_with_dev_deps() {
         .unwrap()
         .join("\n");
     stdin.push_str(&out);
+    stdin.push('\n');
     let out = p
         .cargo_plumbing("plumbing read-lockfile")
         .arg("--lockfile-path")
