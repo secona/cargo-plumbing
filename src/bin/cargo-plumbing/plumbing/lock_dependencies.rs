@@ -45,13 +45,11 @@ pub(crate) fn exec(gctx: &GlobalContext, args: Args) -> CargoResult<()> {
 
     let messages = LockDependenciesIn::parse_stream(BufReader::new(stdin));
 
-    let mut lockfile_version: Option<u32> = None;
     let mut locked_packages = Vec::new();
     let mut unused_patches = None;
 
     for message in messages {
         match message? {
-            LockDependenciesIn::Lockfile { version } => lockfile_version = version,
             LockDependenciesIn::LockedPackage { package } => locked_packages.push(package),
             LockDependenciesIn::UnusedPatches { unused } => unused_patches = Some(unused),
         }
@@ -60,7 +58,6 @@ pub(crate) fn exec(gctx: &GlobalContext, args: Args) -> CargoResult<()> {
     let previous_resolve = if !locked_packages.is_empty() {
         Some(into_resolve(
             &ws,
-            lockfile_version,
             locked_packages,
             unused_patches.unwrap_or_default(),
         )?)

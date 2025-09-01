@@ -24,26 +24,6 @@
     {
       "type": "object",
       "properties": {
-        "version": {
-          "type": [
-            "integer",
-            "null"
-          ],
-          "format": "uint32",
-          "minimum": 0
-        },
-        "reason": {
-          "type": "string",
-          "const": "lockfile"
-        }
-      },
-      "required": [
-        "reason"
-      ]
-    },
-    {
-      "type": "object",
-      "properties": {
         "id": {
           "type": "string"
         },

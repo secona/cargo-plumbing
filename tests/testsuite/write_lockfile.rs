@@ -1,3 +1,4 @@
+use cargo_plumbing_schemas::read_lockfile::ReadLockfileOut;
 use cargo_test_macro::cargo_test;
 use cargo_test_support::compare::assert_e2e;
 use cargo_test_support::registry::{Package, RegistryBuilder};
@@ -273,7 +274,18 @@ fn package_with_git_deps_with_previous_lockfile() {
         .arg("--lockfile-path")
         .arg(p.root().join("Cargo.lock"))
         .run();
-    let previous_lock = String::from_utf8(out.stdout).unwrap();
+    let previous_lock: String = ReadLockfileOut::parse_stream(&*out.stdout)
+        .filter_map(Result::ok)
+        .filter(|msg| {
+            matches!(
+                msg,
+                ReadLockfileOut::LockedPackage { .. } | ReadLockfileOut::UnusedPatches { .. }
+            )
+        })
+        .map(|msg| serde_json::to_string(&msg))
+        .collect::<Result<Vec<_>, _>>()
+        .unwrap()
+        .join("\n");
 
     let out = p
         .cargo_plumbing("plumbing lock-dependencies")

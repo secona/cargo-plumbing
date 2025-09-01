@@ -1,3 +1,4 @@
+use cargo_plumbing_schemas::read_lockfile::ReadLockfileOut;
 use cargo_test_support::basic_manifest;
 use cargo_test_support::compare::assert_e2e;
 use cargo_test_support::git;
@@ -607,16 +608,23 @@ fn lock_dependencies_conservatively_using_previous_lock() {
         .arg("--lockfile-path")
         .arg(&lockfile_path)
         .run();
-    let previous_lock = String::from_utf8(out.stdout).unwrap();
+    let previous_lock: String = ReadLockfileOut::parse_stream(&*out.stdout)
+        .filter_map(Result::ok)
+        .filter(|msg| {
+            matches!(
+                msg,
+                ReadLockfileOut::LockedPackage { .. } | ReadLockfileOut::UnusedPatches { .. }
+            )
+        })
+        .map(|msg| serde_json::to_string(&msg))
+        .collect::<Result<Vec<_>, _>>()
+        .unwrap()
+        .join("\n");
 
     assert_e2e().eq(
         &previous_lock,
         str![[r#"
 [
-  {
-    "reason": "lockfile",
-    "version": 4
-  },
   {
     "checksum": "3a351dafbc8a3a9cba7c06dfe8caa11a3a45f800a336bb5b913a8f1e2652d454",
     "id": "registry+https://github.com/rust-lang/crates.io-index#a@1.0.0",
@@ -772,11 +780,25 @@ fn lock_dependencies_with_git_deps_with_previous_lockfile() {
     git_p.change_file("src/lib.rs", "# simulate change");
     git::commit(&git_r);
 
+    let previous_lock_input: String =
+        ReadLockfileOut::parse_stream(previous_lock_result.as_bytes())
+            .filter_map(Result::ok)
+            .filter(|msg| {
+                matches!(
+                    msg,
+                    ReadLockfileOut::LockedPackage { .. } | ReadLockfileOut::UnusedPatches { .. }
+                )
+            })
+            .map(|msg| serde_json::to_string(&msg))
+            .collect::<Result<Vec<_>, _>>()
+            .unwrap()
+            .join("\n");
+
     let out = p
         .cargo_plumbing("plumbing lock-dependencies")
         .arg("--manifest-path")
         .arg(&manifest_path)
-        .with_stdin(previous_lock_result)
+        .with_stdin(previous_lock_input)
         .run();
     let latest_lock_result = String::from_utf8(out.stdout).unwrap();
 
@@ -899,11 +921,23 @@ fn lock_dependencies_conservatively_using_previous_lock_with_old_lockfile_versio
 
     Package::new("a", "1.0.1").publish();
 
+    let previous_lock_input: String = ReadLockfileOut::parse_stream(previous_lock.as_bytes())
+        .filter_map(Result::ok)
+        .filter(|msg| {
+            matches!(
+                msg,
+                ReadLockfileOut::LockedPackage { .. } | ReadLockfileOut::UnusedPatches { .. }
+            )
+        })
+        .map(|msg| serde_json::to_string(&msg))
+        .collect::<Result<Vec<_>, _>>()
+        .unwrap()
+        .join("\n");
     let out = p
         .cargo_plumbing("plumbing lock-dependencies")
         .arg("--manifest-path")
         .arg(&manifest_path)
-        .with_stdin(previous_lock)
+        .with_stdin(previous_lock_input)
         .run();
     let latest_lock = String::from_utf8(out.stdout).unwrap();
 
@@ -913,15 +947,16 @@ fn lock_dependencies_conservatively_using_previous_lock_with_old_lockfile_versio
 [
   {
     "reason": "lockfile",
-    "version": 1
+    "version": 4
   },
   {
+    "checksum": "3a351dafbc8a3a9cba7c06dfe8caa11a3a45f800a336bb5b913a8f1e2652d454",
     "id": "registry+https://github.com/rust-lang/crates.io-index#a@1.0.0",
     "reason": "locked-package"
   },
   {
     "dependencies": [
-      "registry+https://github.com/rust-lang/crates.io-index#a@1.0.0"
+      "a"
     ],
     "id": "lock-dependencies-test@0.1.0",
     "reason": "locked-package"

@@ -19,7 +19,6 @@ use crate::cargo::core::resolver::encode::{
 /// The `features` and `summaries` fields of the returned struct is empty.
 pub fn into_resolve(
     ws: &Workspace<'_>,
-    version: Option<u32>,
     packages: Vec<NormalizedDependency>,
     patch: NormalizedPatch,
 ) -> CargoResult<Resolve> {
@@ -149,14 +148,9 @@ pub fn into_resolve(
     let features = HashMap::new();
     let summaries = HashMap::new();
 
-    let version = match version {
-        Some(4) => ResolveVersion::V4,
-        Some(3) => ResolveVersion::V3,
-        Some(2) => ResolveVersion::V2,
-        Some(1) => ResolveVersion::V1,
-        None => ResolveVersion::V2,
-        Some(_) => anyhow::bail!("invalid lockfile version"),
-    };
+    // We use a separate schema from cargo's lockfile versions, where it is comparable to the V4
+    // lockfile version.
+    let version = ResolveVersion::V4;
 
     Ok(Resolve::new(
         graph,

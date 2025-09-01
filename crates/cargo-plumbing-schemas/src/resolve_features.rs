@@ -17,9 +17,6 @@ pub enum ResolveFeaturesIn {
         #[cfg_attr(feature = "unstable-schema", schemars(with = "Option<String>"))]
         id: PackageIdSpec,
     },
-    Lockfile {
-        version: Option<u32>,
-    },
     LockedPackage {
         #[serde(flatten)]
         package: NormalizedDependency,
