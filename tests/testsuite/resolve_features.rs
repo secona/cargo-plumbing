@@ -1,3 +1,4 @@
+use cargo_plumbing_schemas::read_lockfile::ReadLockfileOut;
 use cargo_plumbing_schemas::read_manifest::ReadManifestOut;
 use cargo_plumbing_schemas::resolve_features::ResolveFeaturesIn;
 use cargo_test_macro::cargo_test;
@@ -58,13 +59,26 @@ fn package_with_path_deps() {
         .unwrap()
         .join("\n");
     stdin.push_str(&out);
+    stdin.push('\n');
     let out = p
         .cargo_plumbing("plumbing read-lockfile")
         .arg("--lockfile-path")
         .arg(p.root().join("Cargo.lock"))
         .with_status(0)
         .run();
-    stdin.push_str(&String::from_utf8(out.stdout).unwrap());
+    let out: String = ReadLockfileOut::parse_stream(&*out.stdout)
+        .filter_map(Result::ok)
+        .filter(|msg| {
+            matches!(
+                msg,
+                ReadLockfileOut::LockedPackage { .. } | ReadLockfileOut::UnusedPatches { .. }
+            )
+        })
+        .map(|msg| serde_json::to_string(&msg))
+        .collect::<Result<Vec<_>, _>>()
+        .unwrap()
+        .join("\n");
+    stdin.push_str(&out);
 
     p.cargo_plumbing("plumbing resolve-features")
         .with_stdin(stdin)
@@ -172,13 +186,26 @@ fn package_with_varying_deps_sources() {
         .unwrap()
         .join("\n");
     stdin.push_str(&out);
+    stdin.push('\n');
     let out = p
         .cargo_plumbing("plumbing read-lockfile")
         .arg("--lockfile-path")
         .arg(p.root().join("Cargo.lock"))
         .with_status(0)
         .run();
-    stdin.push_str(&String::from_utf8(out.stdout).unwrap());
+    let out: String = ReadLockfileOut::parse_stream(&*out.stdout)
+        .filter_map(Result::ok)
+        .filter(|msg| {
+            matches!(
+                msg,
+                ReadLockfileOut::LockedPackage { .. } | ReadLockfileOut::UnusedPatches { .. }
+            )
+        })
+        .map(|msg| serde_json::to_string(&msg))
+        .collect::<Result<Vec<_>, _>>()
+        .unwrap()
+        .join("\n");
+    stdin.push_str(&out);
 
     p.cargo_plumbing("plumbing resolve-features")
         .with_stdin(stdin)
@@ -275,13 +302,26 @@ fn package_with_features() {
         .unwrap()
         .join("\n");
     stdin.push_str(&out);
+    stdin.push('\n');
     let out = p
         .cargo_plumbing("plumbing read-lockfile")
         .arg("--lockfile-path")
         .arg(p.root().join("Cargo.lock"))
         .with_status(0)
         .run();
-    stdin.push_str(&String::from_utf8(out.stdout).unwrap());
+    let out: String = ReadLockfileOut::parse_stream(&*out.stdout)
+        .filter_map(Result::ok)
+        .filter(|msg| {
+            matches!(
+                msg,
+                ReadLockfileOut::LockedPackage { .. } | ReadLockfileOut::UnusedPatches { .. }
+            )
+        })
+        .map(|msg| serde_json::to_string(&msg))
+        .collect::<Result<Vec<_>, _>>()
+        .unwrap()
+        .join("\n");
+    stdin.push_str(&out);
 
     p.cargo_plumbing("plumbing resolve-features")
         .with_stdin(&stdin)
@@ -457,13 +497,26 @@ fn package_with_optional_dep_without_features() {
         .unwrap()
         .join("\n");
     stdin.push_str(&out);
+    stdin.push('\n');
     let out = p
         .cargo_plumbing("plumbing read-lockfile")
         .arg("--lockfile-path")
         .arg(p.root().join("Cargo.lock"))
         .with_status(0)
         .run();
-    stdin.push_str(&String::from_utf8(out.stdout).unwrap());
+    let out: String = ReadLockfileOut::parse_stream(&*out.stdout)
+        .filter_map(Result::ok)
+        .filter(|msg| {
+            matches!(
+                msg,
+                ReadLockfileOut::LockedPackage { .. } | ReadLockfileOut::UnusedPatches { .. }
+            )
+        })
+        .map(|msg| serde_json::to_string(&msg))
+        .collect::<Result<Vec<_>, _>>()
+        .unwrap()
+        .join("\n");
+    stdin.push_str(&out);
 
     p.cargo_plumbing("plumbing resolve-features")
         .with_stdin(&stdin)
@@ -596,13 +649,26 @@ fn package_with_proc_macro_deps_features() {
         .unwrap()
         .join("\n");
     stdin.push_str(&out);
+    stdin.push('\n');
     let out = p
         .cargo_plumbing("plumbing read-lockfile")
         .arg("--lockfile-path")
         .arg(p.root().join("Cargo.lock"))
         .with_status(0)
         .run();
-    stdin.push_str(&String::from_utf8(out.stdout).unwrap());
+    let out: String = ReadLockfileOut::parse_stream(&*out.stdout)
+        .filter_map(Result::ok)
+        .filter(|msg| {
+            matches!(
+                msg,
+                ReadLockfileOut::LockedPackage { .. } | ReadLockfileOut::UnusedPatches { .. }
+            )
+        })
+        .map(|msg| serde_json::to_string(&msg))
+        .collect::<Result<Vec<_>, _>>()
+        .unwrap()
+        .join("\n");
+    stdin.push_str(&out);
 
     p.cargo_plumbing("plumbing resolve-features")
         .with_stdin(&stdin)
@@ -685,13 +751,26 @@ fn package_with_target_specific_dep() {
         .unwrap()
         .join("\n");
     stdin.push_str(&out);
+    stdin.push('\n');
     let out = p
         .cargo_plumbing("plumbing read-lockfile")
         .arg("--lockfile-path")
         .arg(p.root().join("Cargo.lock"))
         .with_status(0)
         .run();
-    stdin.push_str(&String::from_utf8(out.stdout).unwrap());
+    let out: String = ReadLockfileOut::parse_stream(&*out.stdout)
+        .filter_map(Result::ok)
+        .filter(|msg| {
+            matches!(
+                msg,
+                ReadLockfileOut::LockedPackage { .. } | ReadLockfileOut::UnusedPatches { .. }
+            )
+        })
+        .map(|msg| serde_json::to_string(&msg))
+        .collect::<Result<Vec<_>, _>>()
+        .unwrap()
+        .join("\n");
+    stdin.push_str(&out);
 
     p.cargo_plumbing("plumbing resolve-features")
         .with_stdin(&stdin)
@@ -804,13 +883,26 @@ fn workspace_package_with_members_with_features() {
         .unwrap()
         .join("\n");
     stdin.push_str(&out);
+    stdin.push('\n');
     let out = p
         .cargo_plumbing("plumbing read-lockfile")
         .arg("--lockfile-path")
         .arg(p.root().join("Cargo.lock"))
         .with_status(0)
         .run();
-    stdin.push_str(&String::from_utf8(out.stdout).unwrap());
+    let out: String = ReadLockfileOut::parse_stream(&*out.stdout)
+        .filter_map(Result::ok)
+        .filter(|msg| {
+            matches!(
+                msg,
+                ReadLockfileOut::LockedPackage { .. } | ReadLockfileOut::UnusedPatches { .. }
+            )
+        })
+        .map(|msg| serde_json::to_string(&msg))
+        .collect::<Result<Vec<_>, _>>()
+        .unwrap()
+        .join("\n");
+    stdin.push_str(&out);
 
     p.cargo_plumbing("plumbing resolve-features")
         .with_stdin(&stdin)
@@ -1011,13 +1103,26 @@ fn package_with_dev_deps() {
         .unwrap()
         .join("\n");
     stdin.push_str(&out);
+    stdin.push('\n');
     let out = p
         .cargo_plumbing("plumbing read-lockfile")
         .arg("--lockfile-path")
         .arg(p.root().join("Cargo.lock"))
         .with_status(0)
         .run();
-    stdin.push_str(&String::from_utf8(out.stdout).unwrap());
+    let out: String = ReadLockfileOut::parse_stream(&*out.stdout)
+        .filter_map(Result::ok)
+        .filter(|msg| {
+            matches!(
+                msg,
+                ReadLockfileOut::LockedPackage { .. } | ReadLockfileOut::UnusedPatches { .. }
+            )
+        })
+        .map(|msg| serde_json::to_string(&msg))
+        .collect::<Result<Vec<_>, _>>()
+        .unwrap()
+        .join("\n");
+    stdin.push_str(&out);
 
     p.cargo_plumbing("plumbing resolve-features")
         .with_stdin(&stdin)

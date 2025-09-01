@@ -4,26 +4,6 @@
   "description": "Input messages for `cargo-plumbing lock-dependencies`.",
   "oneOf": [
     {
-      "type": "object",
-      "properties": {
-        "version": {
-          "type": [
-            "integer",
-            "null"
-          ],
-          "format": "uint32",
-          "minimum": 0
-        },
-        "reason": {
-          "type": "string",
-          "const": "lockfile"
-        }
-      },
-      "required": [
-        "reason"
-      ]
-    },
-    {
       "description": "The locked package from the lockfile\n\nExpected to be inputted in a lexicographical order based on the package\nname, matching the order of the `[[package]]` entries in a `Cargo.lock`\nfile.",
       "type": "object",
       "properties": {

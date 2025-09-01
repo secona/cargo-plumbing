@@ -13,9 +13,6 @@ use crate::MessageIter;
 #[cfg_attr(feature = "unstable-schema", derive(schemars::JsonSchema))]
 #[allow(clippy::large_enum_variant)]
 pub enum LockDependenciesIn {
-    Lockfile {
-        version: Option<u32>,
-    },
     /// The locked package from the lockfile
     ///
     /// Expected to be inputted in a lexicographical order based on the package

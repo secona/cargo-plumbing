@@ -60,14 +60,12 @@ pub(crate) fn exec(gctx: &mut GlobalContext, args: Args) -> CargoResult<()> {
 
     let messages = ResolveFeaturesIn::parse_stream(BufReader::new(stdin));
 
-    let mut lock_version = None;
     let mut locked_packages = Vec::new();
     let mut unused_patches = None;
     let mut specs = Vec::new();
 
     for message in messages {
         match message? {
-            ResolveFeaturesIn::Lockfile { version } => lock_version = version,
             ResolveFeaturesIn::LockedPackage { package } => locked_packages.push(package),
             ResolveFeaturesIn::UnusedPatches { unused } => unused_patches = Some(unused),
             ResolveFeaturesIn::Manifest { id } => specs.push(id),
@@ -78,12 +76,7 @@ pub(crate) fn exec(gctx: &mut GlobalContext, args: Args) -> CargoResult<()> {
         anyhow::bail!("incomplete input. no packages found.");
     }
 
-    let resolve = into_resolve(
-        &ws,
-        lock_version,
-        locked_packages,
-        unused_patches.unwrap_or_default(),
-    )?;
+    let resolve = into_resolve(&ws, locked_packages, unused_patches.unwrap_or_default())?;
     let cli_features = CliFeatures::from_command_line(
         &args.features,
         args.all_features,
