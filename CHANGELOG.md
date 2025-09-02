@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
 
+### Features
+
+Commands
+- `resolve-features`
+- (`read-manifest`) Indicate which manifest is the workspace root
+
+### Fixes
+
+- (`read-manifest`) Report the correct manifest for the workspace
+- (`lock-dependences`) Don't require a lockfile version
+- (`read-lockfile`) Always report lockfile version
+
 ## [0.0.3] - 2025-08-13
 
 ### Features
