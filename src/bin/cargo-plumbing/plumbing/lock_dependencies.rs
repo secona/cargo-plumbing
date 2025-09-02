@@ -112,11 +112,7 @@ pub(crate) fn exec(gctx: &GlobalContext, args: Args) -> CargoResult<()> {
                 source: encodable_source_id(id.source_id(), resolve.version()),
                 dependencies: None,
                 replace: None,
-                checksum: if resolve.version() >= ResolveVersion::V2 {
-                    resolve.checksums().get(id).and_then(|x| x.clone())
-                } else {
-                    None
-                },
+                checksum: resolve.checksums().get(id).and_then(|x| x.clone()),
             })
         })
         .collect::<Result<Vec<_>, _>>()?;
