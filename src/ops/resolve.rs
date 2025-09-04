@@ -292,32 +292,34 @@ pub fn normalize_packages(
 
     let package = {
         let mut normalized_packages = Vec::new();
-        if let Some(pkgs) = packages {
-            for pkg in pkgs {
-                let mut pkg = normalize_dependency(pkg)?;
-                // We check if the checksum exist already or not. If the checksum already exists,
-                // we are not dealing with an old lockfile and can safely continue.
-                if pkg.checksum.is_none() {
-                    // If the checksum does not exist, we take it from the parsed metadata table we
-                    // created earlier.
-                    pkg.checksum = metadata_map.remove(&pkg.id);
-                } else {
-                    // Here, it means that the checksum is directly on package, which means that
-                    // the lockfile version is at least V2.
-                    if let Some(v) = version.as_mut() {
-                        **v = (**v).max(2);
-                    }
-                }
-                normalized_packages.push(pkg);
-            }
-        }
+
+        // We first combine the set of packages with the separate `root` package, if it exists.
+        let mut all_packages = packages.unwrap_or_default();
         if let Some(pkg) = root {
+            all_packages.push(pkg);
+            // We only sort here because pushing an additional package may disturb the
+            // lexicographical ordering.
+            all_packages.sort_unstable();
+        }
+
+        for pkg in all_packages {
             let mut pkg = normalize_dependency(pkg)?;
+            // We check if the checksum exist already or not. If the checksum already exists,
+            // we are not dealing with an old lockfile and can safely continue.
             if pkg.checksum.is_none() {
+                // If the checksum does not exist, we take it from the parsed metadata table we
+                // created earlier.
                 pkg.checksum = metadata_map.remove(&pkg.id);
+            } else {
+                // Here, it means that the checksum is directly on package, which means that
+                // the lockfile version is at least V2.
+                if let Some(v) = version.as_mut() {
+                    **v = (**v).max(2);
+                }
             }
             normalized_packages.push(pkg);
         }
+
         normalized_packages
     };
 
