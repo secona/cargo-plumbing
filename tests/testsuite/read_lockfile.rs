@@ -875,15 +875,15 @@ fn output_packages_in_lexicographical_order_old_lockfile() {
     "version": 1
   },
   {
-    "checksum": "c476e54a76316c9d5c6d110f82e7ebece92865f05977c4255e4b8360be626a38",
-    "id": "registry+https://github.com/rust-lang/crates.io-index#zzz@0.1.0",
-    "reason": "locked-package"
-  },
-  {
     "dependencies": [
       "registry+https://github.com/rust-lang/crates.io-index#zzz@0.1.0"
     ],
     "id": "foo@0.0.1",
+    "reason": "locked-package"
+  },
+  {
+    "checksum": "c476e54a76316c9d5c6d110f82e7ebece92865f05977c4255e4b8360be626a38",
+    "id": "registry+https://github.com/rust-lang/crates.io-index#zzz@0.1.0",
     "reason": "locked-package"
   }
 ]

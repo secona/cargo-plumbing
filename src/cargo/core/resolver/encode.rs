@@ -115,7 +115,7 @@ impl Patch {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct EncodableDependency {
     pub name: String,
     pub version: String,
