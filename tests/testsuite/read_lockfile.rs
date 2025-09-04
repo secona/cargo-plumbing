@@ -766,3 +766,130 @@ fn invalid_lockfile_name() {
 "#]])
         .run();
 }
+
+#[cargo_test]
+fn output_packages_in_lexicographical_order() {
+    Package::new("zzz", "0.1.0").publish();
+
+    let p = project()
+        .file("src/lib.rs", "")
+        .file(
+            "Cargo.toml",
+            r#"
+                [package]
+                name = "foo"
+                version = "0.0.1"
+                edition = "2015"
+                authors = []
+
+                [dependencies]
+                zzz = "0.1.0"
+            "#,
+        )
+        .build();
+
+    p.cargo_global("build").run();
+
+    p.cargo_plumbing("plumbing read-lockfile")
+        .arg("--lockfile-path")
+        .arg(p.root().join("Cargo.lock"))
+        .with_status(0)
+        .with_stdout_data(
+            str![[r#"
+[
+  {
+    "reason": "lockfile",
+    "version": 4
+  },
+  {
+    "dependencies": [
+      "zzz"
+    ],
+    "id": "foo@0.0.1",
+    "reason": "locked-package"
+  },
+  {
+    "checksum": "c476e54a76316c9d5c6d110f82e7ebece92865f05977c4255e4b8360be626a38",
+    "id": "registry+https://github.com/rust-lang/crates.io-index#zzz@0.1.0",
+    "reason": "locked-package"
+  }
+]
+"#]]
+            .is_json()
+            .against_jsonlines(),
+        )
+        .run();
+}
+
+#[cargo_test]
+fn output_packages_in_lexicographical_order_old_lockfile() {
+    let cksum = Package::new("zzz", "0.1.0").publish();
+
+    let p = project()
+        .file("src/lib.rs", "")
+        .file(
+            "Cargo.toml",
+            r#"
+                [package]
+                name = "foo"
+                version = "0.0.1"
+                edition = "2015"
+                authors = []
+
+                [dependencies]
+                zzz = "0.1.0"
+            "#,
+        )
+        .file(
+            "Cargo.lock",
+            &format!(
+                r#"
+                    [root]
+                    name = "foo"
+                    version = "0.0.1"
+                    dependencies = [
+                     "zzz 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+                    ]
+
+                    [[package]]
+                    name = "zzz"
+                    version = "0.1.0"
+                    source = "registry+https://github.com/rust-lang/crates.io-index"
+
+                    [metadata]
+                    "checksum zzz 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)" = "{cksum}"
+                "#,
+            ),
+        )
+        .build();
+
+    p.cargo_plumbing("plumbing read-lockfile")
+        .arg("--lockfile-path")
+        .arg(p.root().join("Cargo.lock"))
+        .with_status(0)
+        .with_stdout_data(
+            str![[r#"
+[
+  {
+    "reason": "lockfile",
+    "version": 1
+  },
+  {
+    "checksum": "c476e54a76316c9d5c6d110f82e7ebece92865f05977c4255e4b8360be626a38",
+    "id": "registry+https://github.com/rust-lang/crates.io-index#zzz@0.1.0",
+    "reason": "locked-package"
+  },
+  {
+    "dependencies": [
+      "registry+https://github.com/rust-lang/crates.io-index#zzz@0.1.0"
+    ],
+    "id": "foo@0.0.1",
+    "reason": "locked-package"
+  }
+]
+"#]]
+            .is_json()
+            .against_jsonlines(),
+        )
+        .run();
+}
