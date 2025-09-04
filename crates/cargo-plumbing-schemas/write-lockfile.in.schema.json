@@ -44,9 +44,12 @@
         },
         "dependencies": {
           "type": [
-            "string",
+            "array",
             "null"
-          ]
+          ],
+          "items": {
+            "type": "string"
+          }
         },
         "replace": {
           "type": [
@@ -105,9 +108,12 @@
         },
         "dependencies": {
           "type": [
-            "string",
+            "array",
             "null"
-          ]
+          ],
+          "items": {
+            "type": "string"
+          }
         },
         "replace": {
           "type": [

@@ -48,7 +48,7 @@ pub struct NormalizedDependency {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub checksum: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    #[cfg_attr(feature = "unstable-schema", schemars(with = "Option<String>"))]
+    #[cfg_attr(feature = "unstable-schema", schemars(with = "Option<Vec<String>>"))]
     pub dependencies: Option<Vec<PackageIdSpec>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[cfg_attr(feature = "unstable-schema", schemars(with = "Option<String>"))]
