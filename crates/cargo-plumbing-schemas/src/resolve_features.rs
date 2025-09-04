@@ -14,7 +14,7 @@ use crate::MessageIter;
 #[allow(clippy::large_enum_variant)]
 pub enum ResolveFeaturesIn {
     Manifest {
-        #[cfg_attr(feature = "unstable-schema", schemars(with = "Option<String>"))]
+        #[cfg_attr(feature = "unstable-schema", schemars(with = "String"))]
         id: PackageIdSpec,
     },
     LockedPackage {

@@ -7,10 +7,7 @@
       "type": "object",
       "properties": {
         "id": {
-          "type": [
-            "string",
-            "null"
-          ]
+          "type": "string"
         },
         "reason": {
           "type": "string",
@@ -18,7 +15,8 @@
         }
       },
       "required": [
-        "reason"
+        "reason",
+        "id"
       ]
     },
     {
@@ -41,9 +39,12 @@
         },
         "dependencies": {
           "type": [
-            "string",
+            "array",
             "null"
-          ]
+          ],
+          "items": {
+            "type": "string"
+          }
         },
         "replace": {
           "type": [
@@ -102,9 +103,12 @@
         },
         "dependencies": {
           "type": [
-            "string",
+            "array",
             "null"
-          ]
+          ],
+          "items": {
+            "type": "string"
+          }
         },
         "replace": {
           "type": [
