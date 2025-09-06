@@ -63,6 +63,10 @@ pub enum ResolveFeaturesOut {
         #[serde(skip_serializing_if = "Vec::is_empty")]
         features: Vec<String>,
     },
+    Target {
+        name: String,
+        kind: String,
+    },
 }
 
 #[cfg(feature = "unstable-schema")]
