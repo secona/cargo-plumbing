@@ -5,7 +5,6 @@ use std::process::{Command, Stdio};
 use cargo::CargoResult;
 use cargo_plumbing_schemas::locate_manifest::LocateManifestOut;
 use cargo_plumbing_schemas::read_manifest::ReadManifestOut;
-use cargo_plumbing_schemas::resolve_features::ResolveFeaturesIn;
 use clap::Parser;
 
 #[derive(Debug, Parser)]
@@ -176,11 +175,6 @@ fn run(args: &Args) -> CargoResult<()> {
     let _features = {
         let ids = manifests
             .into_iter()
-            .filter_map(|manifest| match manifest {
-                ReadManifestOut::Manifest { pkg_id, .. } => {
-                    pkg_id.map(|id| ResolveFeaturesIn::Manifest { id })
-                }
-            })
             .map(|msg| serde_json::to_string(&msg))
             .collect::<Result<Vec<_>, _>>()?
             .join("\n");

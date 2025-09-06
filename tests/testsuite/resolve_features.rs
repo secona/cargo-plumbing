@@ -1,6 +1,5 @@
 use cargo_plumbing_schemas::read_lockfile::ReadLockfileOut;
 use cargo_plumbing_schemas::read_manifest::ReadManifestOut;
-use cargo_plumbing_schemas::resolve_features::ResolveFeaturesIn;
 use cargo_test_macro::cargo_test;
 use cargo_test_support::registry::{Dependency, Package, RegistryBuilder};
 use cargo_test_support::{basic_manifest, cross_compile, git, project, str};
@@ -49,11 +48,6 @@ fn package_with_path_deps() {
         .run();
     let out: String = ReadManifestOut::parse_stream(&*out.stdout)
         .filter_map(Result::ok)
-        .filter_map(|msg| match msg {
-            ReadManifestOut::Manifest { pkg_id, .. } => {
-                pkg_id.map(|id| ResolveFeaturesIn::Manifest { id })
-            }
-        })
         .map(|msg| serde_json::to_string(&msg))
         .collect::<Result<Vec<_>, _>>()
         .unwrap()
@@ -176,11 +170,6 @@ fn package_with_varying_deps_sources() {
         .run();
     let out: String = ReadManifestOut::parse_stream(&*out.stdout)
         .filter_map(Result::ok)
-        .filter_map(|msg| match msg {
-            ReadManifestOut::Manifest { pkg_id, .. } => {
-                pkg_id.map(|id| ResolveFeaturesIn::Manifest { id })
-            }
-        })
         .map(|msg| serde_json::to_string(&msg))
         .collect::<Result<Vec<_>, _>>()
         .unwrap()
@@ -292,11 +281,6 @@ fn package_with_features() {
         .run();
     let out: String = ReadManifestOut::parse_stream(&*out.stdout)
         .filter_map(Result::ok)
-        .filter_map(|msg| match msg {
-            ReadManifestOut::Manifest { pkg_id, .. } => {
-                pkg_id.map(|id| ResolveFeaturesIn::Manifest { id })
-            }
-        })
         .map(|msg| serde_json::to_string(&msg))
         .collect::<Result<Vec<_>, _>>()
         .unwrap()
@@ -487,11 +471,6 @@ fn package_with_optional_dep_without_features() {
         .run();
     let out: String = ReadManifestOut::parse_stream(&*out.stdout)
         .filter_map(Result::ok)
-        .filter_map(|msg| match msg {
-            ReadManifestOut::Manifest { pkg_id, .. } => {
-                pkg_id.map(|id| ResolveFeaturesIn::Manifest { id })
-            }
-        })
         .map(|msg| serde_json::to_string(&msg))
         .collect::<Result<Vec<_>, _>>()
         .unwrap()
@@ -639,11 +618,6 @@ fn package_with_proc_macro_deps_features() {
         .run();
     let out: String = ReadManifestOut::parse_stream(&*out.stdout)
         .filter_map(Result::ok)
-        .filter_map(|msg| match msg {
-            ReadManifestOut::Manifest { pkg_id, .. } => {
-                pkg_id.map(|id| ResolveFeaturesIn::Manifest { id })
-            }
-        })
         .map(|msg| serde_json::to_string(&msg))
         .collect::<Result<Vec<_>, _>>()
         .unwrap()
@@ -741,11 +715,6 @@ fn package_with_target_specific_dep() {
         .run();
     let out: String = ReadManifestOut::parse_stream(&*out.stdout)
         .filter_map(Result::ok)
-        .filter_map(|msg| match msg {
-            ReadManifestOut::Manifest { pkg_id, .. } => {
-                pkg_id.map(|id| ResolveFeaturesIn::Manifest { id })
-            }
-        })
         .map(|msg| serde_json::to_string(&msg))
         .collect::<Result<Vec<_>, _>>()
         .unwrap()
@@ -873,11 +842,6 @@ fn workspace_package_with_members_with_features() {
         .run();
     let out: String = ReadManifestOut::parse_stream(&*out.stdout)
         .filter_map(Result::ok)
-        .filter_map(|msg| match msg {
-            ReadManifestOut::Manifest { pkg_id, .. } => {
-                pkg_id.map(|id| ResolveFeaturesIn::Manifest { id })
-            }
-        })
         .map(|msg| serde_json::to_string(&msg))
         .collect::<Result<Vec<_>, _>>()
         .unwrap()
@@ -1093,11 +1057,6 @@ fn package_with_dev_deps() {
         .run();
     let out: String = ReadManifestOut::parse_stream(&*out.stdout)
         .filter_map(Result::ok)
-        .filter_map(|msg| match msg {
-            ReadManifestOut::Manifest { pkg_id, .. } => {
-                pkg_id.map(|id| ResolveFeaturesIn::Manifest { id })
-            }
-        })
         .map(|msg| serde_json::to_string(&msg))
         .collect::<Result<Vec<_>, _>>()
         .unwrap()
