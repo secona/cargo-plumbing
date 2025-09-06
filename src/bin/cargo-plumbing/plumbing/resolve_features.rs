@@ -90,7 +90,11 @@ pub(crate) fn exec(gctx: &mut GlobalContext, args: Args) -> CargoResult<()> {
         match message? {
             ResolveFeaturesIn::LockedPackage { package } => locked_packages.push(package),
             ResolveFeaturesIn::UnusedPatches { unused } => unused_patches = Some(unused),
-            ResolveFeaturesIn::Manifest { id } => specs.push(id),
+            ResolveFeaturesIn::Manifest { pkg_id, .. } => {
+                if let Some(id) = pkg_id {
+                    specs.push(id);
+                }
+            }
         }
     }
 
