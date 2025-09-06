@@ -29,17 +29,39 @@ pub(crate) struct Args {
     /// Do not activate the `default` feature
     #[arg(long)]
     no_default_features: bool,
-    /// Include dev units
-    //
-    // HACK: We're asking the users if they want to include dev units or not. Ideally this should
-    // be done through stdin messages. However, due to cargo API limitations, this workaround is necessary
-    //
-    // See: https://github.com/crate-ci/cargo-plumbing/pull/68#discussion_r2277484208
-    #[arg(long, default_value_t = false)]
-    dev_units: bool,
     /// Target triple
     #[arg(long)]
     target: Vec<String>,
+    /// Include this package's library
+    #[arg(long)]
+    lib: bool,
+    /// Include all binaries
+    #[arg(long)]
+    bins: bool,
+    /// Include only the specified binaries
+    #[arg(long)]
+    bin: Vec<String>,
+    /// Include all examples
+    #[arg(long)]
+    examples: bool,
+    /// Include only the specified examples
+    #[arg(long)]
+    example: Vec<String>,
+    /// Include all tests
+    #[arg(long)]
+    tests: bool,
+    /// Include only the specified tests
+    #[arg(long)]
+    test: Vec<String>,
+    /// Include all benches
+    #[arg(long)]
+    benches: bool,
+    /// Include only the specified benches
+    #[arg(long)]
+    bench: Vec<String>,
+    /// Include all targets
+    #[arg(long)]
+    all_targets: bool,
 }
 
 pub(crate) fn exec(gctx: &mut GlobalContext, args: Args) -> CargoResult<()> {
@@ -83,11 +105,15 @@ pub(crate) fn exec(gctx: &mut GlobalContext, args: Args) -> CargoResult<()> {
         !args.no_default_features,
     )?;
 
-    // HACK: We're asking the users if they want to include dev units or not. Ideally this should
-    // be done through stdin messages. However, due to cargo API limitations, this workaround is necessary
-    //
-    // See: https://github.com/crate-ci/cargo-plumbing/pull/68#discussion_r2277484208
-    let has_dev_units = if args.dev_units {
+    // Determine if we should include dev units from the selected targets.
+    let has_dev_units = if args.examples
+        || args.tests
+        || args.benches
+        || !args.example.is_empty()
+        || !args.test.is_empty()
+        || !args.bench.is_empty()
+        || args.all_targets
+    {
         HasDevUnits::Yes
     } else {
         HasDevUnits::No

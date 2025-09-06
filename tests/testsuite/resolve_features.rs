@@ -1142,8 +1142,9 @@ fn package_with_dev_deps() {
         )
         .run();
 
+    // `--examples` activates dev dependencies
     p.cargo_plumbing("plumbing resolve-features")
-        .arg("--dev-units")
+        .arg("--examples")
         .with_stdin(&stdin)
         .with_status(0)
         .with_stdout_data(
