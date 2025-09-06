@@ -173,18 +173,6 @@ fn run(args: &Args) -> CargoResult<()> {
         child.wait().expect("failed to wait for lock-dependencies");
     }
 
-    // HACK: We determine if we should include dev units or not. This workaround is implemented due
-    // to cargo API limitations.
-    //
-    // See: https://github.com/crate-ci/cargo-plumbing/pull/68#discussion_r2277484208
-    let has_dev_units = args.examples
-        || args.tests
-        || args.benches
-        || !args.example.is_empty()
-        || !args.test.is_empty()
-        || !args.bench.is_empty()
-        || args.all_targets;
-
     let _features = {
         let ids = manifests
             .into_iter()
@@ -202,9 +190,21 @@ fn run(args: &Args) -> CargoResult<()> {
             .stdin(Stdio::piped())
             .stdout(Stdio::piped());
 
-        if has_dev_units {
-            cmd.arg("--dev-units");
+        if args.examples {
+            cmd.arg("--examples");
         }
+        if args.tests {
+            cmd.arg("--tests");
+        }
+        if args.benches {
+            cmd.arg("--benches");
+        }
+        if args.all_targets {
+            cmd.arg("--all-targets");
+        }
+        cmd.args(["--example", &args.example.join(",")]);
+        cmd.args(["--test", &args.test.join(",")]);
+        cmd.args(["--bench", &args.bench.join(",")]);
 
         let mut child = cmd.spawn().expect("failed to spawn resolve-features");
 
