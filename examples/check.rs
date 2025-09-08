@@ -47,8 +47,8 @@ struct Args {
 
 fn run(args: &Args) -> CargoResult<()> {
     let manifest_path = {
-        let mut cmd = Command::new("cargo");
-        cmd.args(["run", "plumbing", "locate-manifest"])
+        let mut cmd = cargo_plumbing_bin();
+        cmd.args(["plumbing", "locate-manifest"])
             .stdout(Stdio::piped());
 
         if let Some(manifest_path) = &args.manifest_path {
@@ -77,8 +77,8 @@ fn run(args: &Args) -> CargoResult<()> {
     };
 
     let manifests: Vec<ReadManifestOut> = {
-        let mut cmd = Command::new("cargo");
-        cmd.args(["run", "plumbing", "read-manifest"])
+        let mut cmd = cargo_plumbing_bin();
+        cmd.args(["plumbing", "read-manifest"])
             .args(["--manifest-path", manifest_path.as_str()])
             .stdout(Stdio::piped());
 
@@ -111,8 +111,8 @@ fn run(args: &Args) -> CargoResult<()> {
 
     let lockfile = {
         if lockfile_path.is_file() {
-            let mut cmd = Command::new("cargo");
-            cmd.args(["run", "plumbing", "read-lockfile"])
+            let mut cmd = cargo_plumbing_bin();
+            cmd.args(["plumbing", "read-lockfile"])
                 .arg("--lockfile-path")
                 .arg(&lockfile_path)
                 .stdout(Stdio::piped());
@@ -130,8 +130,8 @@ fn run(args: &Args) -> CargoResult<()> {
     };
 
     let locked_deps = {
-        let mut cmd = Command::new("cargo");
-        cmd.args(["run", "plumbing", "lock-dependencies"])
+        let mut cmd = cargo_plumbing_bin();
+        cmd.args(["plumbing", "lock-dependencies"])
             .arg("--manifest-path")
             .arg(&manifest_path)
             .stdin(Stdio::piped())
@@ -156,8 +156,8 @@ fn run(args: &Args) -> CargoResult<()> {
     };
 
     if lockfile.is_some_and(|lockfile| lockfile != locked_deps) {
-        let mut cmd = Command::new("cargo");
-        cmd.args(["run", "plumbing", "write-lockfile"])
+        let mut cmd = cargo_plumbing_bin();
+        cmd.args(["plumbing", "write-lockfile"])
             .arg("--lockfile-path")
             .arg(&lockfile_path)
             .stdin(Stdio::piped());
@@ -197,8 +197,8 @@ fn run(args: &Args) -> CargoResult<()> {
             .collect::<Result<Vec<_>, _>>()?
             .join("\n");
 
-        let mut cmd = Command::new("cargo");
-        cmd.args(["run", "plumbing", "resolve-features"])
+        let mut cmd = cargo_plumbing_bin();
+        cmd.args(["plumbing", "resolve-features"])
             .stdin(Stdio::piped())
             .stdout(Stdio::piped());
 
@@ -235,5 +235,21 @@ fn main() {
     match run(&args) {
         Ok(()) => {}
         Err(e) => println!("error: {e}"),
+    }
+}
+
+/// [`Command`] for launching cargo-plumbing binary
+///
+/// The `CARGO_PLUMBING_BIN` env variable should point to a `cargo-plumbing` binary. It is used
+/// mostly for testing examples.
+///
+/// See <https://github.com/crate-ci/cargo-plumbing/issues/108>
+fn cargo_plumbing_bin() -> Command {
+    if let Ok(bin) = std::env::var("CARGO_PLUMBING_BIN") {
+        Command::new(bin)
+    } else {
+        let mut cmd = Command::new("cargo");
+        cmd.arg("run");
+        cmd
     }
 }
