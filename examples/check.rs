@@ -4,6 +4,7 @@ use std::process::{Command, Stdio};
 
 use cargo::CargoResult;
 use cargo_plumbing_schemas::locate_manifest::LocateManifestOut;
+use cargo_plumbing_schemas::read_lockfile::ReadLockfileOut;
 use cargo_plumbing_schemas::read_manifest::ReadManifestOut;
 use cargo_plumbing_schemas::resolve_features::ResolveFeaturesIn;
 use clap::Parser;
@@ -142,7 +143,22 @@ fn run(args: &Args) -> CargoResult<()> {
         let mut stdin = child.stdin.take().expect("failed to take stdin");
 
         if let Some(ref lockfile) = lockfile {
-            stdin.write_all(lockfile).expect("failed to write to stdin");
+            let previous_lock: String = ReadLockfileOut::parse_stream(lockfile.as_slice())
+                .filter_map(Result::ok)
+                .filter(|msg| {
+                    matches!(
+                        msg,
+                        ReadLockfileOut::LockedPackage { .. }
+                            | ReadLockfileOut::UnusedPatches { .. }
+                    )
+                })
+                .map(|msg| serde_json::to_string(&msg))
+                .collect::<Result<Vec<_>, _>>()
+                .unwrap()
+                .join("\n");
+            stdin
+                .write_all(previous_lock.as_bytes())
+                .expect("failed to write to stdin");
             drop(stdin);
         }
 
