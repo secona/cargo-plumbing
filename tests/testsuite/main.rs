@@ -5,6 +5,7 @@ mod cargo_plumbing_read_lockfile;
 mod cargo_plumbing_read_manifest;
 mod cargo_plumbing_resolve_features;
 mod cargo_plumbing_write_lockfile;
+mod check;
 mod locate_manifest;
 mod lock_dependencies;
 mod read_lockfile;
@@ -24,6 +25,8 @@ pub trait ProjectExt {
     fn cargo_plumbing(&self, cmd: &str) -> Execs;
     /// Creates an `Execs` instance to run the globally installed `cargo` command
     fn cargo_global(&self, cmd: &str) -> Execs;
+    /// Creates an `Execs` instance to run an example
+    fn cargo_plumbing_example(&self, example: &str) -> Execs;
 }
 
 impl ProjectExt for Project {
@@ -41,6 +44,18 @@ impl ProjectExt for Project {
 
         let mut p = ProcessBuilder::new(cargo);
         p.test_env().cwd(self.root()).arg_line(cmd);
+
+        execs().with_process_builder(p)
+    }
+
+    fn cargo_plumbing_example(&self, example: &str) -> Execs {
+        let bin = snapbox::cmd::compile_example(example, []).unwrap();
+        let cargo_plumbing = cargo_plumbing_exe();
+
+        let mut p = ProcessBuilder::new(bin);
+        p.test_env()
+            .cwd(self.root())
+            .env("CARGO_PLUMBING_BIN", cargo_plumbing);
 
         execs().with_process_builder(p)
     }
