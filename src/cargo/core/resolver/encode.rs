@@ -18,14 +18,14 @@ use url::Url;
 
 /// The `Cargo.lock` structure.
 #[derive(Serialize, Deserialize, Debug)]
-pub struct EncodableResolve {
+pub struct TomlLockfile {
     pub version: Option<u32>,
-    pub package: Option<Vec<EncodableDependency>>,
+    pub package: Option<Vec<TomlLockfileDependency>>,
     /// `root` is optional to allow backward compatibility.
-    pub root: Option<EncodableDependency>,
-    pub metadata: Option<Metadata>,
-    #[serde(default, skip_serializing_if = "Patch::is_empty")]
-    pub patch: Patch,
+    pub root: Option<TomlLockfileDependency>,
+    pub metadata: Option<TomlLockfileMetadata>,
+    #[serde(default, skip_serializing_if = "TomlLockfilePatch::is_empty")]
+    pub patch: TomlLockfilePatch,
 }
 
 pub fn build_path_deps(
@@ -103,36 +103,36 @@ pub fn build_path_deps(
 }
 
 #[derive(Serialize, Deserialize, Debug, Default)]
-pub struct Patch {
-    pub unused: Vec<EncodableDependency>,
+pub struct TomlLockfilePatch {
+    pub unused: Vec<TomlLockfileDependency>,
 }
 
-pub type Metadata = BTreeMap<String, String>;
+pub type TomlLockfileMetadata = BTreeMap<String, String>;
 
-impl Patch {
+impl TomlLockfilePatch {
     fn is_empty(&self) -> bool {
         self.unused.is_empty()
     }
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Eq, PartialOrd, Ord)]
-pub struct EncodableDependency {
+pub struct TomlLockfileDependency {
     pub name: String,
     pub version: String,
-    pub source: Option<EncodableSourceId>,
+    pub source: Option<TomlLockfileSourceId>,
     pub checksum: Option<String>,
-    pub dependencies: Option<Vec<EncodablePackageId>>,
-    pub replace: Option<EncodablePackageId>,
+    pub dependencies: Option<Vec<TomlLockfilePackageId>>,
+    pub replace: Option<TomlLockfilePackageId>,
 }
 
 #[derive(Debug)]
-pub struct EncodableSourceId {
+pub struct TomlLockfileSourceId {
     source_str: String,
     kind: SourceKind,
     url: Url,
 }
 
-impl EncodableSourceId {
+impl TomlLockfileSourceId {
     pub fn new(source: String) -> CargoResult<Self> {
         let source_str = source.clone();
         let (kind, url) = source
@@ -179,13 +179,13 @@ impl EncodableSourceId {
     }
 }
 
-impl fmt::Display for EncodableSourceId {
+impl fmt::Display for TomlLockfileSourceId {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.source_str)
     }
 }
 
-impl Serialize for EncodableSourceId {
+impl Serialize for TomlLockfileSourceId {
     fn serialize<S>(&self, s: S) -> Result<S::Ok, S::Error>
     where
         S: ser::Serializer,
@@ -198,7 +198,7 @@ impl Serialize for EncodableSourceId {
     }
 }
 
-impl<'de> Deserialize<'de> for EncodableSourceId {
+impl<'de> Deserialize<'de> for TomlLockfileSourceId {
     fn deserialize<D>(d: D) -> Result<Self, D::Error>
     where
         D: de::Deserializer<'de>,
@@ -208,22 +208,22 @@ impl<'de> Deserialize<'de> for EncodableSourceId {
     }
 }
 
-impl PartialEq for EncodableSourceId {
+impl PartialEq for TomlLockfileSourceId {
     fn eq(&self, other: &Self) -> bool {
         self.kind == other.kind && self.url == other.url
     }
 }
 
-impl Eq for EncodableSourceId {}
+impl Eq for TomlLockfileSourceId {}
 
-impl PartialOrd for EncodableSourceId {
-    fn partial_cmp(&self, other: &EncodableSourceId) -> Option<Ordering> {
+impl PartialOrd for TomlLockfileSourceId {
+    fn partial_cmp(&self, other: &TomlLockfileSourceId) -> Option<Ordering> {
         Some(self.cmp(other))
     }
 }
 
-impl Ord for EncodableSourceId {
-    fn cmp(&self, other: &EncodableSourceId) -> Ordering {
+impl Ord for TomlLockfileSourceId {
+    fn cmp(&self, other: &TomlLockfileSourceId) -> Ordering {
         self.kind
             .cmp(&other.kind)
             .then_with(|| self.url.cmp(&other.url))
@@ -231,13 +231,13 @@ impl Ord for EncodableSourceId {
 }
 
 #[derive(Debug, PartialOrd, Ord, PartialEq, Eq)]
-pub struct EncodablePackageId {
+pub struct TomlLockfilePackageId {
     pub name: String,
     pub version: Option<String>,
-    pub source: Option<EncodableSourceId>,
+    pub source: Option<TomlLockfileSourceId>,
 }
 
-impl fmt::Display for EncodablePackageId {
+impl fmt::Display for TomlLockfilePackageId {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.name)?;
         if let Some(s) = &self.version {
@@ -250,17 +250,17 @@ impl fmt::Display for EncodablePackageId {
     }
 }
 
-impl FromStr for EncodablePackageId {
+impl FromStr for TomlLockfilePackageId {
     type Err = anyhow::Error;
 
-    fn from_str(s: &str) -> CargoResult<EncodablePackageId> {
+    fn from_str(s: &str) -> CargoResult<TomlLockfilePackageId> {
         let mut s = s.splitn(3, ' ');
         let name = s.next().unwrap();
         let version = s.next();
         let source_id = match s.next() {
             Some(s) => {
                 if let Some(s) = s.strip_prefix('(').and_then(|s| s.strip_suffix(')')) {
-                    Some(EncodableSourceId::new(s.to_owned())?)
+                    Some(TomlLockfileSourceId::new(s.to_owned())?)
                 } else {
                     anyhow::bail!("invalid serialized PackageId")
                 }
@@ -268,7 +268,7 @@ impl FromStr for EncodablePackageId {
             None => None,
         };
 
-        Ok(EncodablePackageId {
+        Ok(TomlLockfilePackageId {
             name: name.to_owned(),
             version: version.map(|v| v.to_owned()),
             // Default to url encoded.
@@ -277,7 +277,7 @@ impl FromStr for EncodablePackageId {
     }
 }
 
-impl Serialize for EncodablePackageId {
+impl Serialize for TomlLockfilePackageId {
     fn serialize<S>(&self, s: S) -> Result<S::Ok, S::Error>
     where
         S: ser::Serializer,
@@ -286,14 +286,14 @@ impl Serialize for EncodablePackageId {
     }
 }
 
-impl<'de> Deserialize<'de> for EncodablePackageId {
-    fn deserialize<D>(d: D) -> Result<EncodablePackageId, D::Error>
+impl<'de> Deserialize<'de> for TomlLockfilePackageId {
+    fn deserialize<D>(d: D) -> Result<TomlLockfilePackageId, D::Error>
     where
         D: de::Deserializer<'de>,
     {
         String::deserialize(d).and_then(|string| {
             string
-                .parse::<EncodablePackageId>()
+                .parse::<TomlLockfilePackageId>()
                 .map_err(de::Error::custom)
         })
     }
@@ -327,7 +327,7 @@ pub fn encodable_resolve_node(
     id: PackageId,
     resolve: &Resolve,
     state: &EncodeState<'_>,
-) -> EncodableDependency {
+) -> TomlLockfileDependency {
     let (replace, deps) = match resolve.replacement(id) {
         Some(id) => (
             Some(encodable_package_id(id, state, resolve.version())),
@@ -343,7 +343,7 @@ pub fn encodable_resolve_node(
         }
     };
 
-    EncodableDependency {
+    TomlLockfileDependency {
         name: id.name().to_string(),
         version: id.version().to_string(),
         source: encodable_source_id(id.source_id(), resolve.version()),
@@ -361,7 +361,7 @@ pub fn encodable_package_id(
     id: PackageId,
     state: &EncodeState<'_>,
     resolve_version: ResolveVersion,
-) -> EncodablePackageId {
+) -> TomlLockfilePackageId {
     let mut version = Some(id.version().to_string());
     let mut id_to_encode = id.source_id();
     if resolve_version <= ResolveVersion::V2 {
@@ -382,22 +382,22 @@ pub fn encodable_package_id(
             }
         }
     }
-    EncodablePackageId {
+    TomlLockfilePackageId {
         name: id.name().to_string(),
         version,
         source,
     }
 }
 
-pub fn encodable_source_id(id: SourceId, version: ResolveVersion) -> Option<EncodableSourceId> {
+pub fn encodable_source_id(id: SourceId, version: ResolveVersion) -> Option<TomlLockfileSourceId> {
     if id.is_path() {
         None
     } else {
         Some(
             if version >= ResolveVersion::V4 {
-                EncodableSourceId::new(id.as_url().to_string())
+                TomlLockfileSourceId::new(id.as_url().to_string())
             } else {
-                EncodableSourceId::new(id.as_url().to_string())
+                TomlLockfileSourceId::new(id.as_url().to_string())
             }
             .unwrap(),
         )
