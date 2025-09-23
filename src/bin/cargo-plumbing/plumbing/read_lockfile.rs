@@ -5,9 +5,9 @@ use std::path::PathBuf;
 use anyhow::Context as _;
 use cargo::util::Filesystem;
 use cargo::{CargoResult, GlobalContext};
-use cargo_plumbing::cargo::core::resolver::encode::TomlLockfile;
 use cargo_plumbing::ops::resolve::normalize_resolve;
 use cargo_plumbing_schemas::read_lockfile::ReadLockfileOut;
+use cargo_util_schemas::lockfile::TomlLockfile;
 
 #[derive(Debug, clap::Args)]
 pub(crate) struct Args {

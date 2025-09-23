@@ -372,6 +372,7 @@ dependencies = [
  "cargo-test-macro",
  "cargo-test-support",
  "cargo-util",
+ "cargo-util-schemas",
  "clap",
  "clap-cargo",
  "semver",

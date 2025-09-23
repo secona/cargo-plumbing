@@ -7,11 +7,12 @@ use cargo::core::{
 use cargo::util::Graph;
 use cargo::CargoResult;
 use cargo_plumbing_schemas::lockfile::{NormalizedDependency, NormalizedPatch, NormalizedResolve};
-
-use crate::cargo::core::resolver::encode::{
-    build_path_deps, TomlLockfile, TomlLockfileDependency, TomlLockfileMetadata,
-    TomlLockfilePackageId, TomlLockfilePatch,
+use cargo_util_schemas::lockfile::{
+    TomlLockfile, TomlLockfileDependency, TomlLockfileMetadata, TomlLockfilePackageId,
+    TomlLockfilePatch,
 };
+
+use crate::cargo::core::resolver::encode::build_path_deps;
 
 /// Converts plumbing messages into an incomplete [`Resolve`]
 ///
