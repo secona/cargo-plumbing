@@ -183,7 +183,7 @@ pub fn encodable_source_id(id: SourceId, version: ResolveVersion) -> Option<Toml
     } else {
         Some(
             if version >= ResolveVersion::V4 {
-                TomlLockfileSourceId::new(id.as_url().to_string())
+                TomlLockfileSourceId::new(id.as_encoded_url().to_string())
             } else {
                 TomlLockfileSourceId::new(id.as_url().to_string())
             }

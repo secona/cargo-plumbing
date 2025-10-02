@@ -863,6 +863,7 @@ fn v4_and_git_url_encoded() {
 
     let ref_kind = "branch";
     let git_ref = "a-_+#$)";
+    let encoded_ref = "a-_%2B%23%24%29";
     repo.branch(git_ref, &repo.find_commit(head_id).unwrap(), true)
         .unwrap();
 
@@ -874,7 +875,7 @@ version = 4
 [[package]]
 name = "dep1"
 version = "0.5.0"
-source = "git+[ROOTURL]/dep1?{ref_kind}={git_ref}#{head_id}"
+source = "git+[ROOTURL]/dep1?{ref_kind}={encoded_ref}#{head_id}"
 
 [[package]]
 name = "foo"
