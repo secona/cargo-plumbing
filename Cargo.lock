@@ -375,6 +375,7 @@ dependencies = [
  "cargo-util-schemas",
  "clap",
  "clap-cargo",
+ "glob",
  "semver",
  "serde",
  "serde-untagged",
